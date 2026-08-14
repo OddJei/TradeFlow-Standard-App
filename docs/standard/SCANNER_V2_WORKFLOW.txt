@@ -1,0 +1,299 @@
+TRADEFLOW SCANNER TEST WORKFLOW SPEC
+BARCODE CAPTURE AND HANDOFF FLOW
+
+Purpose
+- This scanner test app validates the barcode capture path before it is merged into the wider TradeFlow flow.
+- The app is split into two surfaces: the main launcher page and the scanner tab.
+- The goal is simple: capture a barcode quickly, send it to the Apps Script backend, and push it back into the main app input.
+
+Core Rule
+- A barcode is not considered delivered until it is stored in Script Properties and returned to the main page.
+- The scanner tab is responsible for capture.
+- The backend is responsible for temporary storage and history.
+- The main page is responsible for displaying the scanned barcode.
+
+1) Main Launcher Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ User opens the scanner test main page                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Load launcher UI               │
+                    │  - barcode input               │
+                    │  - scan button                 │
+                    │  - status area                 │
+                    │  - backend URL display         │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Request deployment URL         │
+                    │  from Apps Script backend       │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Stay idle until user presses   │
+                    │  the Scan button                │
+                    └─────────────────────────────────┘
+
+Notes
+- The launcher page is the receiving side of the test.
+- The backend URL must load first because the scanner tab depends on it.
+- The app does not keep a listener open on page load, which reduces Apps Script quota use.
+
+2) Scanner Launch Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ User presses the Scan button                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Build scanner HTML             │
+                    │  using the backend URL          │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Create blob URL                │
+                    │  for standalone scanner tab     │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Open scanner in new tab        │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Start temporary barcode        │
+                    │  listening session              │
+                    └─────────────────────────────────┘
+
+Notes
+- The launcher does not scan directly.
+- It generates a temporary standalone scanner experience and opens it in a separate tab.
+- Listening starts only after the scan launch succeeds.
+
+3) Popup and Launch Feedback Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Browser decides whether the scanner tab opens                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                ┌─────────────────────┴─────────────────────┐
+                ▼                                           ▼
+    Scanner tab opens successfully              Scanner tab does not open
+                │                                           │
+                ▼                                           ▼
+    Show scanner-opened status                    Show toast and status only
+    and monitor tab close                         without persistent warning UI
+
+Notes
+- The test app suppresses the old popup warning panel.
+- Launch failure is now communicated through status text and toast feedback only.
+
+4) Scanner Initialization Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Scanner tab loads                                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Load Quagga library            │
+                    │  and scanner UI                 │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Request camera access          │
+                    │  - try high resolution          │
+                    │  - fall back to lower profile   │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Bind video stream and          │
+                    │  initialize barcode decoder     │
+                    └─────────────────────────────────┘
+
+Notes
+- If camera access is denied, scanning stops and the tab shows an error state.
+- The decoder supports common barcode formats used in retail tests.
+
+5) Barcode Detection Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Camera sees a barcode                                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Quagga detects code            │
+                    │  and returns barcode text       │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Show result in scanner tab     │
+                    │  and play success feedback      │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Send barcode to backend        │
+                    │  automatically                  │
+                    └─────────────────────────────────┘
+
+Notes
+- The current test flow auto-sends after a successful detection.
+- The result UI still exposes copy, clear, and send actions for debugging.
+
+6) Manual and Test Entry Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Camera scan is unavailable or user wants to simulate                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                ┌─────────────────────┴─────────────────────┐
+                ▼                                           ▼
+       Manual barcode entry                         Test barcode generation
+                │                                           │
+                ▼                                           ▼
+       User types barcode                            App creates TEST######
+                │                                           │
+                ▼                                           ▼
+       Show result and send                          Send via POST, then GET fallback
+
+Notes
+- Manual entry is the no-camera fallback.
+- The test button is the full pipeline check for backend connectivity.
+
+7) Backend Receive Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Backend receives barcode from scanner tab                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Validate action and barcode    │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Save latest barcode            │
+                    │  in Script Properties           │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Append scan history entry      │
+                    │  with timestamp and source      │
+                    └─────────────────────────────────┘
+
+Notes
+- `LAST_SCANNED_BARCODE` is the live handoff key.
+- `SCAN_HISTORY` is the lightweight audit trail for test activity.
+
+8) Main App Handoff Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Main page waits for the next barcode                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  During active scan session,    │
+                    │  long-poll using waitForBarcode │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  If barcode arrives             │
+                    │  update barcode input           │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Clear latest barcode           │
+                    │  from backend                   │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Stop listening session         │
+                    │  until Scan is pressed again    │
+                    └─────────────────────────────────┘
+
+Notes
+- This is the primary handoff path.
+- The launcher updates the visible input so the operator can confirm what was captured.
+- The listener is short-lived and only runs while a scan attempt is active.
+
+9) Polling Fallback Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Push listener misses a barcode or times out                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Poll getLatestBarcode()        │
+                    │  every 1.5 seconds only         │
+                    │  during active scan session     │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  If new barcode is found        │
+                    │  process it and clear it        │
+                    └─────────────────────────────────┘
+
+Notes
+- Polling is the backup, not the preferred flow.
+- It protects the test against long-poll interruptions.
+- Polling stops after a barcode is received, the scan tab is closed, or the session expires.
+
+10) Scanner Send Rules
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Every completed send follows the same delivery contract                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                ┌─────────────────────┼─────────────────────┐
+                ▼                     ▼                     ▼
+        Camera detection         Manual entry            Test barcode
+                │                     │                     │
+                ▼                     ▼                     ▼
+          POST first             POST first             POST first
+                │                     │                     │
+                ▼                     ▼                     ▼
+        GET as fallback         GET as fallback        GET as fallback
+                │                     │                     │
+                ▼                     ▼                     ▼
+      Save barcode server-side  Save barcode server-side  Save barcode server-side
+
+11) Test Roles
+Operator
+- Open the launcher page.
+- Start the scanner tab.
+- Scan or type a barcode.
+- Confirm the barcode appears back in the launcher input.
+
+Developer / Admin
+- Verify deployment URL is correct.
+- Verify Apps Script receive and history functions.
+- Check debug logs when POST or GET fallback fails.
+- Confirm popup, camera, and backend edge cases are handled.
+
+12) Local Test Principles
+- Keep the launcher page lightweight and always ready to receive.
+- Treat the scanner tab as a temporary capture tool, not the source of truth.
+- Persist only the latest handoff value and a short history.
+- Prefer automatic return of scanned data over manual copy-paste.
+- Always provide a manual or test fallback when camera flow fails.
+- Start backend listening only on demand so idle pages do not burn Apps Script quota.
+
+End State
+- The scanner test app behaves like a reliable barcode handoff rig:
+- open scanner fast
+- capture barcode
+- send to backend
+- return value to launcher
+- confirm result visibly
+- recover through polling or manual fallback when needed

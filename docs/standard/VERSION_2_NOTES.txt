@@ -1,0 +1,3022 @@
+let implement this now {# TRADEFLOW PRO - COMPLETE SYSTEM DOCUMENTATION
+
+## 📋 TABLE OF CONTENTS
+
+1. [Executive Summary](#1-executive-summary)
+2. [System Architecture](#2-system-architecture)
+3. [Business Setup & Configuration](#3-business-setup--configuration)
+4. [Data Structures & Algorithms](#4-data-structures--algorithms)
+5. [Complete Feature List](#5-complete-feature-list)
+6. [Barcode Scanning System](#6-barcode-scanning-system)
+7. [User Security & Access Control](#7-user-security--access-control)
+8. [Database Schema](#8-database-schema)
+9. [Workflow Diagrams](#9-workflow-diagrams)
+10. [API Reference](#10-api-reference)
+11. [Performance & Caching](#11-performance--caching)
+12. [Offline Capabilities](#12-offline-capabilities)
+13. [Deployment Guide](#13-deployment-guide)
+14. [Voice Input System](#14-voice-input-system)
+15. [Appendix](#15-appendix)
+
+---
+
+## 1. EXECUTIVE SUMMARY
+
+### 1.1 Overview
+TradeFlow Pro is a comprehensive, offline-first inventory management system built on Google Apps Script with a mobile-first HTML/CSS/JS frontend. It serves as a complete business operations platform for retail and wholesale businesses across Zambia, integrating:
+
+- **Sales Management** with cart-based checkout
+- **Barcode Scanning** - HID scanner (primary) + Camera (secondary) + Manual entry
+- **Voice Input** - Speech-to-text for hands-free product search
+- **Inventory Control** with FIFO batch cost tracking
+- **Procurement System** with budget builder and purchase orders
+- **Stock Adjustments** for damage, theft, returns, and corrections
+- **Staff Management** with role-based access
+- **Financial Reporting** with daily/weekly/monthly ledgers
+- **Admin Dashboard** with real-time analytics
+- **Multi-Business Support** with 15+ business types and category sets
+
+### 1.2 Core Value Proposition
+- **Never Run Out of Stock** - Automatic reorder suggestions based on Min/Max stock
+- **Accurate Cost of Goods Sold (COGS)** - FIFO batch cost tracking
+- **Optimized Cash Flow** - Buy only what you need with budget builder
+- **Complete Audit Trail** - Every transaction recorded and traceable
+- **Mobile-First Design** - Works on phones, tablets, and desktop
+- **Offline Capable** - Works without internet using IndexedDB
+- **Barcode Ready** - HID scanners + Camera + Manual entry
+- **Voice Enabled** - Hands-free product search
+- **Multi-Business Ready** - 15+ business types with pre-configured categories
+
+### 1.3 Design Philosophy: Input Methods as First-Class Citizens
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                    THREE INPUT METHODS - ONE BUSINESS LOGIC                         │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                                                                                 ││
+│  │  ┌─────────────────┐                                                           ││
+│  │  │                 │                                                           ││
+│  │  │   HID Scanner   │──┐                                                       ││
+│  │  │   (Keyboard)    │  │                                                       ││
+│  │  │                 │  │                                                       ││
+│  │  └─────────────────┘  │                                                       ││
+│  │                       │                                                       ││
+│  │  ┌─────────────────┐  │    ┌─────────────────────────────────────────────────┐ ││
+│  │  │                 │  ├───▶│             lookupProduct(barcode)             │ ││
+│  │  │  Camera Scanner │  │    │                                                 │ ││
+│  │  │  (Mobile)       │  │    │  ┌─────────────────────────────────────────────┐ │ ││
+│  │  │                 │  │    │  │  • Check cache                             │ │ ││
+│  │  └─────────────────┘  │    │  │  • Search ProductMaster                    │ │ ││
+│  │                       │    │  │  • Update barcode cache                    │ │ ││
+│  │  ┌─────────────────┐  │    │  │  • Return product details                  │ │ ││
+│  │  │                 │  │    │  └─────────────────────────────────────────────┘ │ ││
+│  │  │  Manual Entry   │──┘                                                       ││
+│  │  │  (Type/Keyboard)│                                                          ││
+│  │  │                 │                                                          ││
+│  │  └─────────────────┘                                                          ││
+│  │                                                                                 ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         CONTEXT-DEPENDENT ACTIONS                               ││
+│  │                                                                                 ││
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐          ││
+│  │  │   Sales     │  │   Restock   │  │   Search    │  │  Budget    │          ││
+│  │  │   Panel     │  │   Panel     │  │   Panel     │  │  Builder   │          ││
+│  │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘          ││
+│  │        │               │               │               │                      ││
+│  │        ▼               ▼               ▼               ▼                      ││
+│  │  ┌─────────────────────────────────────────────────────────────────────────────┐││
+│  │  │                                                                             │││
+│  │  │  Sales:      Scan → Add to Cart                                            │││
+│  │  │  Restock:    Scan → Pre-fill restock form                                  │││
+│  │  │  Search:     Scan → Show product details                                   │││
+│  │  │  Budget:     Scan → Add product to budget list                             │││
+│  │  │                                                                             │││
+│  │  └─────────────────────────────────────────────────────────────────────────────┘││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 2. SYSTEM ARCHITECTURE
+
+### 2.1 Technology Stack
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Frontend** | HTML5, CSS3, JavaScript (ES6) | User interface, responsive design |
+| **Backend** | Google Apps Script (ES5) | Business logic, sheet operations |
+| **Database** | Google Sheets | Primary data storage |
+| **Cache** | CacheService (server), sessionStorage (client) | Performance optimization |
+| **Offline** | IndexedDB (client), Cache API | Offline operations |
+| **Hosting** | Google Apps Script Web App | Deployment |
+| **Barcode** | HID Keyboard Emulation (primary), Camera (secondary) | Scanner input |
+| **Voice** | Web Speech API | Speech-to-text for hands-free search |
+
+### 2.2 System Components
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                              USER INTERFACE                                         │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌───────────┐│
+│  │   Landing   │  │   Staff     │  │   Admin     │  │   Modals    │  │  Barcode  ││
+│  │   Portal    │  │   Tools     │  │  Dashboard  │  │   / Dialogs │  │  Scanner  ││
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘  └───────────┘│
+│  ┌─────────────┐                                                                  ││
+│  │   Voice     │                                                                  ││
+│  │   Input     │                                                                  ││
+│  └─────────────┘                                                                  ││
+└─────────────────────────────────────────────────────────────────────────────────────┘
+                                         │
+                                         ▼
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                           CLIENT-SIDE CACHE                                         │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐                    │
+│  │  sessionStorage │  │    IndexedDB    │  │    Cache API    │                    │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘                    │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+                                         │
+                                         ▼
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                         GOOGLE APPS SCRIPT BACKEND                                  │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                           BUSINESS LOGIC LAYER                                   ││
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────────┐ ││
+│  │  │  Sales  │ │Inventory│ │ Budget  │ │  Staff  │ │  Auth   │ │  Business   │ ││
+│  │  │ Manager │ │ Manager │ │ Builder │ │ Manager │ │ Manager │ │   Setup     │ ││
+│  │  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────────┘ ││
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐                                        ││
+│  │  │ Barcode │ │  Voice  │ │  Sync   │                                        ││
+│  │  │ Lookup  │ │  Search │ │ Manager │                                        ││
+│  │  └─────────┘ └─────────┘ └─────────┘                                        ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                              CACHE LAYER                                        ││
+│  │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐                 ││
+│  │  │  CacheService   │  │   Property      │  │   Script        │                 ││
+│  │  │    (TTL)        │  │   Service       │  │   Properties    │                 ││
+│  │  └─────────────────┘  └─────────────────┘  └─────────────────┘                 ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+                                         │
+                                         ▼
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                           GOOGLE SHEETS DATABASE                                    │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌─────────────┐│
+│  │Product   │ │ SalesLog │ │ Restock  │ │ Staff    │ │ Category │ │  Business   ││
+│  │Master    │ │          │ │ Log      │ │ Master   │ │ Config   │ │   Config    ││
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘ └─────────────┘│
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌─────────────┐│
+│  │  Daily   │ │ Weekly   │ │ Monthly  │ │ Purchase │ │ Stock    │ │   Custom    ││
+│  │  Ledger  │ │ Ledger   │ │ Ledger   │ │ Orders   │ │Adj.      │ │ Categories  ││
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘ └─────────────┘│
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐                              │
+│  │  Batch   │ │  Sales   │ │  Barcode │ │  Voice   │                              │
+│  │  Costs   │ │Allocation│ │  Lookup  │ │  Logs    │                              │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘                              │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 3. BUSINESS SETUP & CONFIGURATION
+
+### 3.1 Business Onboarding Flow
+
+When a user first opens TradeFlow Pro, they go through a setup wizard:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                       TRADEFLOW PRO SETUP WIZARD                                    │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  STEP 1: Business Details                                                           │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │  📝 Tell us about your business                                                 ││
+│  │                                                                                  ││
+│  │  Business Name: [Example Business_________________________________________]  ││
+│  │  Owner/Manager:  [Example Owner___________________________________________]  ││
+│  │  WhatsApp Number: [REPLACE_WITH_WHATSAPP_NUMBER________________________________________]  ││
+│  │  Email Address:   [REPLACE_WITH_CONTACT_EMAIL___________________________]  ││
+│  │  Province:        [Lusaka Province ▼]                                          ││
+│  │  District:        [Lusaka District ▼]                                          ││
+│  │  Physical Address: [REPLACE_WITH_BUSINESS_ADDRESS________________________]  ││
+│  │                                                                                  ││
+│  │  [Next →]                                                                       ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+│                                                                                     │
+│  STEP 2: Business Type                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │  🏪 What type of business do you run?                                           ││
+│  │                                                                                  ││
+│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐        ││
+│  │  │ 🛒 Retail    │ │ 🔧 Hardware  │ │ 💊 Pharmacy  │ │ 👗 Clothing  │        ││
+│  │  │ Supermarket  │ │ & Building   │ │ & Health    │ │ & Fashion    │        ││
+│  │  └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘        ││
+│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐        ││
+│  │  │ 📱 Electronics│ │ 🛋️ Furniture │ │ 🚗 Automotive│ │ 🍔 Restaurant │        ││
+│  │  │ & Appliances │ │ & Decor     │ │ & Parts      │ │ & Food       │        ││
+│  │  └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘        ││
+│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐        ││
+│  │  │ 💄 Cosmetics │ │ 🌾 Agriculture│ │ 📝 Stationery │ │ 📱 Cellular  │        ││
+│  │  │ & Beauty    │ │ & Farming    │ │ & Office    │ │ & Airtime   │        ││
+│  │  └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘        ││
+│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐        ││
+│  │  │ 🏗️ Construction│ │ 🐕 Pet       │ │ 📚 Bookstore │ │ 🏪 General   │        ││
+│  │  │ & Building   │ │ Supplies    │ │ & Learning  │ │ Retail      │        ││
+│  │  └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘        ││
+│  │                                                                                  ││
+│  │  [← Back]  [✅ Setup Business]                                                  ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+│                                                                                     │
+│  STEP 3: Input Methods Configuration                                                │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │  🎯 How will you enter products?                                                ││
+│  │                                                                                  ││
+│  │  ☑ HID Scanner (USB/Bluetooth)                                                  ││
+│  │  ☑ Camera Scanner (Phone/Tablet)                                                ││
+│  │  ☑ Manual Entry (Type barcode)                                                  ││
+│  │  ☑ Voice Search (Say product name)                                              ││
+│  │                                                                                  ││
+│  │  [← Back]  [Next →]                                                             ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+│                                                                                     │
+│  STEP 4: Setup Complete                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │  ✅ Business Configured Successfully!                                           ││
+│  │                                                                                  ││
+│  │  Business: Example Business                                                      ││
+│  │  Type: Cosmetics & Beauty Salon                                                 ││
+│  │  Owner: Example Owner                                                            ││
+│  │  WhatsApp: REPLACE_WITH_WHATSAPP_NUMBER                                                    ││
+│  │  Address: REPLACE_WITH_BUSINESS_ADDRESS                                          ││
+│  │                                                                                  ││
+│  │  📦 Created 18 product categories                                               ││
+│  │  📊 Created 9 management sheets                                                 ││
+│  │  👤 Staff portal configured                                                     ││
+│  │  🔐 Admin portal configured                                                     ││
+│  │  📷 Barcode scanning enabled (HID + Camera)                                     ││
+│  │  🎤 Voice search enabled                                                        ││
+│  │                                                                                  ││
+│  │  [🚀 Open Dashboard]                                                            ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 3.2 Business Type Categories
+
+#### 3.2.1 Retail Supermarket (🛒)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT001 | Fresh Produce & Vegetables |
+| 2 | CAT002 | Dairy & Eggs |
+| 3 | CAT003 | Meat & Poultry |
+| 4 | CAT004 | Bakery & Bread |
+| 5 | CAT005 | Beverages (Soft Drinks, Water, Juice) |
+| 6 | CAT006 | Snacks & Confectionery |
+| 7 | CAT007 | Rice, Pasta & Grains |
+| 8 | CAT008 | Canned & Packaged Foods |
+| 9 | CAT009 | Cooking Oil, Spices & Condiments |
+| 10 | CAT010 | Frozen Foods |
+| 11 | CAT011 | Household & Cleaning |
+| 12 | CAT012 | Personal Care & Toiletries |
+| 13 | CAT013 | Baby & Infant Products |
+| 14 | CAT014 | Pet Food & Supplies |
+| 15 | CAT015 | Breakfast Cereals & Oats |
+| 16 | CAT016 | Health & Wellness |
+| 17 | CAT017 | Stationery & Office Supplies |
+| 18 | CAT018 | General Merchandise |
+
+#### 3.2.2 Hardware & Building Supplies (🔧)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT101 | Cement & Concrete Products |
+| 2 | CAT102 | Bricks, Blocks & Paving |
+| 3 | CAT103 | Roofing & Ceiling Materials |
+| 4 | CAT104 | Timber & Wood Products |
+| 5 | CAT105 | Plumbing & Pipe Fittings |
+| 6 | CAT106 | Electrical Wiring & Cables |
+| 7 | CAT107 | Paint, Varnish & Coatings |
+| 8 | CAT108 | Nails, Screws & Fasteners |
+| 9 | CAT109 | Tiles & Flooring Materials |
+| 10 | CAT110 | Glass & Glazing Products |
+| 11 | CAT111 | Steel & Metal Products |
+| 12 | CAT112 | Garden & Landscaping |
+| 13 | CAT113 | Hand Tools & Power Tools |
+| 14 | CAT114 | Safety Equipment & PPE |
+| 15 | CAT115 | Kitchen & Bathroom Fittings |
+| 16 | CAT116 | Electrical Appliances |
+| 17 | CAT117 | Insulation Materials |
+| 18 | CAT118 | PVC & Plastic Piping |
+
+#### 3.2.3 Pharmacy & Health Store (💊)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT201 | Prescription Medications |
+| 2 | CAT202 | Over-the-Counter Medicines |
+| 3 | CAT203 | Vitamins & Supplements |
+| 4 | CAT204 | First Aid & Wound Care |
+| 5 | CAT205 | Baby & Child Healthcare |
+| 6 | CAT206 | Personal Hygiene Products |
+| 7 | CAT207 | Beauty & Skincare |
+| 8 | CAT208 | Oral Care Products |
+| 9 | CAT209 | Eye Care (Glasses, Contact Lenses) |
+| 10 | CAT210 | Medical Equipment & Devices |
+| 11 | CAT211 | Health Drinks & Nutrition |
+| 12 | CAT212 | Herbal & Traditional Medicines |
+| 13 | CAT213 | Diabetes & Chronic Care |
+| 14 | CAT214 | Pain Relief & Analgesics |
+| 15 | CAT215 | Allergy & Respiratory |
+| 16 | CAT216 | Digestive Health |
+| 17 | CAT217 | Sexual & Reproductive Health |
+| 18 | CAT218 | Pet Medications & Supplements |
+
+#### 3.2.4 Clothing & Fashion Boutique (👗)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT301 | Men's Clothing (Shirts, Trousers) |
+| 2 | CAT302 | Women's Clothing (Dresses, Tops) |
+| 3 | CAT303 | Children's Wear |
+| 4 | CAT304 | Footwear (Shoes, Sandals) |
+| 5 | CAT305 | Accessories (Bags, Scarves) |
+| 6 | CAT306 | Jewelry & Watches |
+| 7 | CAT307 | Traditional Clothing (Chitenge) |
+| 8 | CAT308 | Sportswear & Activewear |
+| 9 | CAT309 | Lingerie & Sleepwear |
+| 10 | CAT310 | Formal Wear (Suits, Dresses) |
+| 11 | CAT311 | Denim & Jeans |
+| 12 | CAT312 | Outerwear (Jackets, Coats) |
+| 13 | CAT313 | Swimwear & Beachwear |
+| 14 | CAT314 | School Uniforms |
+| 15 | CAT315 | Workwear & Corporate |
+| 16 | CAT316 | Hosiery & Socks |
+| 17 | CAT317 | Belts & Leather Goods |
+| 18 | CAT318 | Hats & Caps |
+
+#### 3.2.5 Electronics & Appliances (📱)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT401 | Smartphones & Tablets |
+| 2 | CAT402 | Laptops & Computers |
+| 3 | CAT403 | Televisions & Home Entertainment |
+| 4 | CAT404 | Audio & Sound Systems |
+| 5 | CAT405 | Kitchen Appliances |
+| 6 | CAT406 | Refrigerators & Freezers |
+| 7 | CAT407 | Washing Machines & Dryers |
+| 8 | CAT408 | Mobile Accessories |
+| 9 | CAT409 | Camera & Photography |
+| 10 | CAT410 | Gaming & Video Games |
+| 11 | CAT411 | Computer Accessories |
+| 12 | CAT412 | Air Conditioners & Fans |
+| 13 | CAT413 | Smart Home Devices |
+| 14 | CAT414 | Vacuum Cleaners |
+| 15 | CAT415 | Electric Tools |
+| 16 | CAT416 | Fitness & Health Tech |
+| 17 | CAT417 | Batteries & Power Banks |
+| 18 | CAT418 | Cables & Connectivity |
+
+#### 3.2.6 Furniture Store (🛋️)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT501 | Living Room Furniture |
+| 2 | CAT502 | Bedroom Furniture |
+| 3 | CAT503 | Dining Room Furniture |
+| 4 | CAT504 | Office Furniture |
+| 5 | CAT505 | Outdoor Furniture |
+| 6 | CAT506 | Kitchen Cabinets |
+| 7 | CAT507 | Mattresses & Bedding |
+| 8 | CAT508 | Curtains & Blinds |
+| 9 | CAT509 | Rugs & Carpets |
+| 10 | CAT510 | Lighting Fixtures |
+| 11 | CAT511 | Shelving & Storage |
+| 12 | CAT512 | TV Stands & Entertainment Units |
+| 13 | CAT513 | Children's Furniture |
+| 14 | CAT514 | Bathroom Furniture |
+| 15 | CAT515 | Doors & Door Fittings |
+| 16 | CAT516 | Decorative Items & Mirrors |
+| 17 | CAT517 | Window Frames & Glass |
+| 18 | CAT518 | Custom Furniture Orders |
+
+#### 3.2.7 Automotive Parts & Accessories (🚗)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT601 | Engine Parts & Components |
+| 2 | CAT602 | Brake Systems & Parts |
+| 3 | CAT603 | Transmission & Gearbox |
+| 4 | CAT604 | Suspension & Steering |
+| 5 | CAT605 | Electrical & Ignition Parts |
+| 6 | CAT606 | Tires & Wheels |
+| 7 | CAT607 | Batteries & Charging Systems |
+| 8 | CAT608 | Filters (Oil, Air, Fuel) |
+| 9 | CAT609 | Exhaust Systems |
+| 10 | CAT610 | Air Conditioning Parts |
+| 11 | CAT611 | Body Parts & Panels |
+| 12 | CAT612 | Lighting & Bulbs |
+| 13 | CAT613 | Wipers & Windows |
+| 14 | CAT614 | Cooling System |
+| 15 | CAT615 | Lubricants & Oils |
+| 16 | CAT616 | Car Accessories |
+| 17 | CAT617 | Tools & Garage Equipment |
+| 18 | CAT618 | Performance Upgrades |
+
+#### 3.2.8 Restaurant & Food Service (🍔)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT701 | Beverages (Coffee, Tea, Drinks) |
+| 2 | CAT702 | Main Dishes (Meat, Fish, Poultry) |
+| 3 | CAT703 | Sides & Accompaniments |
+| 4 | CAT704 | Desserts & Pastries |
+| 5 | CAT705 | Breakfast Items |
+| 6 | CAT706 | Lunch Specials |
+| 7 | CAT707 | Dinner Specials |
+| 8 | CAT708 | Salads & Healthy Options |
+| 9 | CAT709 | Sandwiches & Wraps |
+| 10 | CAT710 | Pasta & Noodle Dishes |
+| 11 | CAT711 | Pizza & Italian Cuisine |
+| 12 | CAT712 | Traditional Zambian Dishes |
+| 13 | CAT713 | International Cuisine |
+| 14 | CAT714 | Catering & Event Services |
+| 15 | CAT715 | Kid's Meals |
+| 16 | CAT716 | Seafood & Fish |
+| 17 | CAT717 | Vegetarian & Vegan |
+| 18 | CAT718 | Alcoholic & Non-alcoholic |
+
+#### 3.2.9 Cosmetics & Beauty Salon (💄)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT801 | Haircare (Shampoos, Conditioners) |
+| 2 | CAT802 | Skincare (Moisturizers, Serums) |
+| 3 | CAT803 | Makeup (Foundation, Lipstick) |
+| 4 | CAT804 | Nail Care (Polishes, Tools) |
+| 5 | CAT805 | Fragrances & Perfumes |
+| 6 | CAT806 | Salon Equipment & Tools |
+| 7 | CAT807 | Hair Extensions & Wigs |
+| 8 | CAT808 | Men's Grooming |
+| 9 | CAT809 | Sun Protection |
+| 10 | CAT810 | Bath & Body (Soaps, Scrubs) |
+| 11 | CAT811 | Organic & Natural Products |
+| 12 | CAT812 | Anti-aging & Skincare |
+| 13 | CAT813 | Professional Makeup |
+| 14 | CAT814 | Beauty Accessories |
+| 15 | CAT815 | Eyelashes & Brows |
+| 16 | CAT816 | Tattoo & Permanent Makeup |
+| 17 | CAT817 | Spa & Wellness Products |
+| 18 | CAT818 | Hair Dyes & Color |
+
+#### 3.2.10 Agricultural Supplies (🌾)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT901 | Fertilizers (Organic, Chemical) |
+| 2 | CAT902 | Seeds (Maize, Wheat, Vegetables) |
+| 3 | CAT903 | Pesticides & Herbicides |
+| 4 | CAT904 | Farming Tools & Equipment |
+| 5 | CAT905 | Animal Feed & Supplements |
+| 6 | CAT906 | Veterinary Supplies & Medicines |
+| 7 | CAT907 | Irrigation Equipment |
+| 8 | CAT908 | Greenhouses & Shade Nets |
+| 9 | CAT909 | Harvesting Tools |
+| 10 | CAT910 | Livestock Equipment |
+| 11 | CAT911 | Packaging & Storage |
+| 12 | CAT912 | Soil Testing & Analysis |
+| 13 | CAT913 | Drainage & Water Management |
+| 14 | CAT914 | Organic Farming Supplies |
+| 15 | CAT915 | Horticulture & Flowers |
+| 16 | CAT916 | Poultry Equipment & Supplies |
+| 17 | CAT917 | Beekeeping Equipment |
+| 18 | CAT918 | Fish Farming Supplies |
+
+#### 3.2.11 Stationery & Office Supplies (📝)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT001 | Paper & Printing Supplies |
+| 2 | CAT002 | Writing Instruments (Pens, Pencils) |
+| 3 | CAT003 | Office Furniture (Chairs, Desks) |
+| 4 | CAT004 | Filing & Organization |
+| 5 | CAT005 | Computer Supplies (Ink, Toner) |
+| 6 | CAT006 | School Supplies (Books, Uniforms) |
+| 7 | CAT007 | Art & Craft Materials |
+| 8 | CAT008 | Office Machines (Printers, Scanners) |
+| 9 | CAT009 | Envelopes & Mailing Supplies |
+| 10 | CAT010 | Business Forms & Stationery |
+| 11 | CAT011 | Whiteboards & Presentation |
+| 12 | CAT012 | Packaging (Boxes, Tape) |
+| 13 | CAT013 | Cleaning Supplies |
+| 14 | CAT014 | Safety & First Aid (Office) |
+| 15 | CAT015 | Technology Accessories |
+| 16 | CAT016 | Coffee & Breakroom Supplies |
+| 17 | CAT017 | Desk Accessories |
+| 18 | CAT018 | Office Decor & Plants |
+
+#### 3.2.12 Cellular & Airtime Services (📱)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT101 | Mobile Airtime (MTN, Airtel, Zamtel) |
+| 2 | CAT102 | Mobile Money Transactions |
+| 3 | CAT103 | Data Bundles |
+| 4 | CAT104 | Smartphones & Tablets |
+| 5 | CAT105 | SIM Cards |
+| 6 | CAT106 | Mobile Accessories |
+| 7 | CAT107 | Bill Payments (ZESCO, ZAWA, Water) |
+| 8 | CAT108 | Prepaid Electricity |
+| 9 | CAT109 | Digital Money Transfers |
+| 10 | CAT110 | International Calling |
+| 11 | CAT111 | Television Subscriptions |
+| 12 | CAT112 | Internet Services |
+| 13 | CAT113 | Digital Gift Cards |
+| 14 | CAT114 | Mobile Banking Services |
+| 15 | CAT115 | Insurance Products |
+| 16 | CAT116 | Travel & Ticket Services |
+| 17 | CAT117 | Education & School Fees |
+| 18 | CAT118 | Donations & Zakat |
+
+#### 3.2.13 Construction & Building (🏗️)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT201 | Materials (Sand, Stone, Bricks) |
+| 2 | CAT202 | Lumber (Timber, Plywood) |
+| 3 | CAT203 | Concrete & Cement |
+| 4 | CAT204 | Steel & Metal (Reinforcement, Beams) |
+| 5 | CAT205 | Roofing & Ceiling |
+| 6 | CAT206 | Plumbing & Pipes |
+| 7 | CAT207 | Electrical & Wiring |
+| 8 | CAT208 | Painting & Finishing |
+| 9 | CAT209 | Flooring & Tiling |
+| 10 | CAT210 | Windows & Glass |
+| 11 | CAT211 | Construction Tools & Equipment |
+| 12 | CAT212 | Safety Gear & PPE |
+| 13 | CAT213 | Landscaping & Exterior |
+| 14 | CAT214 | HVAC (Heating, Cooling, Ventilation) |
+| 15 | CAT215 | Insulation & Soundproofing |
+| 16 | CAT216 | Scaffolding & Ladders |
+| 17 | CAT217 | Formwork & Shuttering |
+| 18 | CAT218 | Waterproofing & Treatments |
+
+#### 3.2.14 Pet Supplies Store (🐕)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT301 | Pet Food (Dry, Wet, Treats) |
+| 2 | CAT302 | Pet Accessories (Collars, Leashes) |
+| 3 | CAT303 | Bedding & Kennels |
+| 4 | CAT304 | Grooming Products |
+| 5 | CAT305 | Pet Medications & Supplements |
+| 6 | CAT306 | Toys & Entertainment |
+| 7 | CAT307 | Pet Travel & Carriers |
+| 8 | CAT308 | Fish Tanks & Aquarium Supplies |
+| 9 | CAT309 | Bird Cages & Supplies |
+| 10 | CAT310 | Reptile & Terrarium Supplies |
+| 11 | CAT311 | Training Aids |
+| 12 | CAT312 | Hygiene & Waste Management |
+| 13 | CAT313 | Feeding Bowls & Waterers |
+| 14 | CAT314 | Veterinary Equipment |
+| 15 | CAT315 | Pet Insurance |
+| 16 | CAT316 | Dog Clothing & Accessories |
+| 17 | CAT317 | Cat Furniture (Scratchers, Trees) |
+| 18 | CAT318 | Pet ID & Tracking |
+
+#### 3.2.15 Bookstore & Learning Materials (📚)
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT401 | School Textbooks |
+| 2 | CAT402 | University & College Texts |
+| 3 | CAT403 | Children's Books & Readers |
+| 4 | CAT404 | Fiction & Novels |
+| 5 | CAT405 | Non-Fiction (Business, Self-Help) |
+| 6 | CAT406 | Educational Software & Learning Apps |
+| 7 | CAT407 | Art & Craft Supplies |
+| 8 | CAT408 | Musical Instruments & Sheet Music |
+| 9 | CAT409 | Stationery (Books, Pens, Paper) |
+| 10 | CAT410 | Educational Toys & Games |
+| 11 | CAT411 | Curriculum Materials |
+| 12 | CAT412 | E-books & Digital Libraries |
+| 13 | CAT413 | Language Learning |
+| 14 | CAT414 | Reference Materials |
+| 15 | CAT415 | Scientific Equipment |
+| 16 | CAT416 | Study Guides & Exam Prep |
+| 17 | CAT417 | Religious & Spiritual Books |
+| 18 | CAT418 | Career & Vocational Guides |
+
+#### 3.2.16 General Retail (🏪) - Fallback
+| # | Category ID | Category Name |
+|---|-------------|---------------|
+| 1 | CAT001 | General Merchandise |
+| 2 | CAT002 | Food & Beverages |
+| 3 | CAT003 | Household Items |
+| 4 | CAT004 | Personal Care |
+| 5 | CAT005 | Clothing & Accessories |
+| 6 | CAT006 | Electronics & Appliances |
+| 7 | CAT007 | Stationery & Office |
+| 8 | CAT008 | Health & Wellness |
+| 9 | CAT009 | Home & Garden |
+| 10 | CAT010 | Toys & Entertainment |
+| 11 | CAT011 | Automotive |
+| 12 | CAT012 | Construction & Hardware |
+| 13 | CAT013 | Agriculture |
+| 14 | CAT014 | Pet Supplies |
+| 15 | CAT015 | Books & Learning |
+| 16 | CAT016 | Cosmetics & Beauty |
+| 17 | CAT017 | Pharmacy & Health |
+| 18 | CAT018 | Cellular & Airtime |
+
+### 3.3 Business Configuration Schema
+
+#### New Sheet: BusinessConfig
+| Column | Name | Type | Description | Example |
+|--------|------|------|-------------|---------|
+| A | Config Key | String | Setting name | "BUSINESS_NAME" |
+| B | Config Value | String | Setting value | "Example Business" |
+| C | Updated At | Date | Last update | 2026-06-30 14:25:30 |
+
+#### Configuration Keys
+| Key | Description | Example |
+|-----|-------------|---------|
+| BUSINESS_NAME | Business trading name | "Example Business" |
+| BUSINESS_TYPE | Category set to use | "cosmetics_beauty" |
+| OWNER_NAME | Business owner/manager | "REPLACE_WITH_OWNER_NAME" |
+| WHATSAPP_NUMBER | Contact WhatsApp | "REPLACE_WITH_WHATSAPP_NUMBER" |
+| EMAIL_ADDRESS | Contact email | "REPLACE_WITH_CONTACT_EMAIL" |
+| PROVINCE | Business province | "REPLACE_WITH_PROVINCE" |
+| DISTRICT | Business district | "REPLACE_WITH_DISTRICT" |
+| PHYSICAL_ADDRESS | Business location | "REPLACE_WITH_BUSINESS_ADDRESS" |
+| SETUP_COMPLETED_AT | Setup timestamp | "2026-06-30T14:25:30Z" |
+| BUSINESS_LOGO | Optional logo URL | "https://..." |
+| TAX_ID | Business registration | "12345678" |
+| CURRENCY | Business currency | "ZMW" |
+| BARCODE_ENABLED | Barcode scanning | "true" |
+| VOICE_ENABLED | Voice search | "true" |
+| SCAN_MODE_HID | HID scanner enabled | "true" |
+| SCAN_MODE_CAMERA | Camera scanner enabled | "true" |
+| SCAN_MODE_MANUAL | Manual entry enabled | "true" |
+
+---
+
+## 4. DATA STRUCTURES & ALGORITHMS
+
+### 4.1 Data Structures
+
+#### 4.1.1 Products (ProductMaster)
+```javascript
+{
+  productId: string,        // PRD001, PRD002...
+  productName: string,      // Product display name
+  categoryId: string,       // CAT001, CAT002...
+  barcode: string,          // Product barcode (UPC/EAN/QR)
+  staffId: string,          // ST001 - creator
+  unitMeasure: string,      // kg, L, pieces
+  unitPrice: number,        // Selling price
+  unitCost: number,         // Cost price
+  reorderLevel: number,     // Alert threshold
+  minStock: number,         // Minimum stock alert level
+  maxStock: number,         // Maximum stock ideal level
+  sizeVariant: string,      // Size or variant
+  batchHandled: boolean,    // Batch sale enabled
+  batchMeasure: string,     // Carton, case, box
+  batchUnits: number,       // Units per batch
+  batchPrice: number,       // Price per batch
+  expiryDate: date,         // Expiry if applicable
+  createdAt: date,          // Creation timestamp
+  currentStock: number,     // Computed from restocks - sales
+  supplier: string,         // Supplier name
+  brand: string,            // Brand name
+  storageCondition: string  // Storage requirements
+}
+```
+
+#### 4.1.2 Barcode Lookup
+```javascript
+{
+  barcode: string,          // Scanned barcode
+  productId: string,        // Matched product
+  productName: string,      // Product name
+  categoryId: string,       // Category
+  unitPrice: number,        // Selling price
+  currentStock: number,     // Available stock
+  lastScanned: Date         // Last scan timestamp
+}
+```
+
+#### 4.1.3 Voice Search
+```javascript
+{
+  query: string,            // Spoken text
+  confidence: number,       // Speech recognition confidence
+  matchedProducts: [{       // Search results
+    productId: string,
+    productName: string,
+    score: number           // Match score
+  }],
+  processedAt: Date
+}
+```
+
+#### 4.1.4 Sales Cart (Client-side)
+```javascript
+{
+  rows: [{
+    productId: string,
+    productName: string,
+    categoryId: string,
+    unitMeasure: string,
+    unitPrice: number,
+    qty: number,
+    staffId: string,
+    saleMode: 'unit' | 'batch',
+    barcode: string,          // Scanned barcode if applicable
+    voiceQuery: string        // Voice search query if used
+  }],
+  date: Date,
+  totalGross: number,
+  barcodeBuffer: string,      // Accumulated barcode input
+  voiceMode: boolean          // Whether voice input is active
+}
+```
+
+#### 4.1.5 Batch Costs (FIFO)
+```javascript
+{
+  batchId: string,          // BYYYY-NNN or B-PRD001-YYYYMMDD
+  productId: string,
+  purchaseDate: Date,
+  supplier: string,
+  quantityPurchased: number,
+  unitCost: number,
+  totalCost: number,
+  remaining: number,        // Stock left in this batch
+  status: 'Active' | 'Completed'
+}
+```
+
+#### 4.1.6 Purchase Order
+```javascript
+{
+  orderId: string,          // PO-2026-001
+  createdAt: Date,
+  supplier: string,
+  status: 'Draft' | 'Ordered' | 'Partial' | 'Received' | 'Complete' | 'Cancelled',
+  totalExpectedCost: number,
+  totalActualCost: number,
+  createdBy: string,
+  notes: string,
+  items: [{
+    itemId: string,
+    productId: string,
+    productName: string,
+    barcode: string,
+    expectedQty: number,
+    actualQty: number,
+    unitCost: number,
+    totalCost: number,
+    purchased: boolean,
+    receivedAt: Date
+  }]
+}
+```
+
+#### 4.1.7 Stock Adjustment
+```javascript
+{
+  adjustmentId: string,     // ADJ-2026-001
+  productId: string,
+  batchId: string,
+  barcode: string,          // Optional barcode
+  adjustmentType: 'damage' | 'theft' | 'return' | 'writeoff' | 'breakage' | 'correction' | 'sample' | 'transfer',
+  quantity: number,
+  unitCost: number,
+  totalCost: number,
+  reason: string,
+  staffId: string,
+  createdAt: Date,
+  status: 'Pending' | 'Approved' | 'Rejected'
+}
+```
+
+### 4.2 Algorithms
+
+#### 4.2.1 Barcode Processing (O(1))
+```javascript
+function processBarcode(barcode) {
+  // 1. Normalize barcode (strip spaces, validate)
+  barcode = normalizeBarcode(barcode);
+  
+  // 2. Check minimum length
+  if (barcode.length < 3) return null;
+  
+  // 3. Check barcode cache (sessionStorage)
+  var cached = getBarcodeCache(barcode);
+  if (cached) return cached;
+  
+  // 4. Look up in BarcodeLookup sheet
+  var product = lookupBarcodeInSheet(barcode);
+  
+  // 5. If not found, search ProductMaster by barcode column
+  if (!product) {
+    product = searchProductByBarcode(barcode);
+  }
+  
+  // 6. Cache result for future scans
+  if (product) {
+    updateBarcodeCache(barcode, product);
+  }
+  
+  // 7. Log scan history
+  logBarcodeScan(barcode, product, getCurrentContext());
+  
+  //    Total: O(1) with cache, O(n) on cache miss
+  return product;
+}
+```
+
+#### 4.2.2 Voice Search (O(n))
+```javascript
+function voiceSearch(query) {
+  // 1. Normalize query (lowercase, remove extra spaces)
+  query = normalizeQuery(query);
+  
+  // 2. Get all products from ProductMaster
+  var products = getAllProducts();
+  
+  // 3. Calculate match score for each product
+  var results = products.map(function(product) {
+    var score = 0;
+    var name = product.productName.toLowerCase();
+    var words = query.split(' ');
+    
+    // 3a. Exact match bonus
+    if (name === query) score += 100;
+    
+    // 3b. Starts with bonus
+    if (name.startsWith(query)) score += 50;
+    
+    // 3c. Word match
+    words.forEach(function(word) {
+      if (name.includes(word)) score += 10;
+      if (name.split(' ').indexOf(word) > -1) score += 20;
+    });
+    
+    // 3d. Partial match
+    if (query.length > 3 && name.includes(query)) score += 30;
+    
+    return {
+      productId: product.productId,
+      productName: product.productName,
+      score: score,
+      stock: product.currentStock
+    };
+  });
+  
+  // 4. Sort by score (highest first)
+  results.sort(function(a, b) { return b.score - a.score; });
+  
+  // 5. Return top matches
+  //    Total: O(n log n)
+  return results.slice(0, 10);
+}
+```
+
+#### 4.2.3 Stock Calculation (O(n) with caching)
+```javascript
+function buildStockMap() {
+  // 1. Sum all restock quantities by product ID
+  //    Time: O(R) where R = restock log rows
+  // 2. Subtract all sales quantities by product ID
+  //    Time: O(S) where S = sales log rows
+  // 3. Cache result with 90 second TTL
+  //    Total: O(R + S)
+  return stockMap;
+}
+```
+
+#### 4.2.4 FIFO Cost Allocation (O(n log n))
+```javascript
+function allocateFifoCosts(productId, qty) {
+  // 1. Get all active batches for product
+  //    Time: O(B) where B = batch count
+  // 2. Sort by purchase date (oldest first)
+  //    Time: O(B log B)
+  // 3. Deduct from oldest batches until qty fulfilled
+  //    Time: O(B)
+  //    Total: O(B log B)
+  return allocation;
+}
+```
+
+#### 4.2.5 Budget Builder (O(P))
+```javascript
+function buildBudget() {
+  // 1. Get all products with Min/Max stock
+  //    Time: O(P) where P = product count
+  // 2. Calculate reorder quantity = MaxStock - CurrentStock
+  // 3. Filter out products where reorderQty <= 0
+  // 4. Sort by urgency (lowest stock first)
+  //    Total: O(P log P)
+  return budgetItems;
+}
+```
+
+#### 4.2.6 Product ID Generation (O(N))
+```javascript
+function generateProductId(sheet) {
+  // 1. Get all existing product IDs
+  //    Time: O(N) where N = product count
+  // 2. Find max numeric suffix (PRD001 → 1)
+  // 3. Return PRD + (max + 1).padStart(3, '0')
+  //    Total: O(N)
+  return productId;
+}
+```
+
+#### 4.2.7 Cache Strategies
+
+| Cache Level | Storage | TTL | Strategy |
+|------------|---------|-----|----------|
+| Barcode Lookup | CacheService | 3600s | Write-through, invalidate on product change |
+| Voice Search | sessionStorage | 300s | Cache recent searches |
+| Stock Map | CacheService | 90s | Write-through, invalidate on sale/restock |
+| Categories | CacheService | 600s | Write-through, invalidate on category change |
+| Staff List | CacheService | 300s | Write-through, invalidate on staff change |
+| Dashboard | CacheService | 45s | Version-based invalidation |
+| Products | sessionStorage | 120s | Cache per category, invalidate on product change |
+| Settings | CacheService | 600s | Invalidated on settings change |
+
+---
+
+## 5. COMPLETE FEATURE LIST
+
+### 5.1 Landing Portal
+| Feature | Description | Module |
+|---------|-------------|--------|
+| Portal Selection | Staff Tools / Admin Dashboard | UI |
+| Status Indicator | Shows current portal | UI |
+| Mobile Responsive | Works on all screen sizes | UI |
+| Setup Wizard | First-time business configuration | UI |
+| Input Method Config | Enable/disable HID, Camera, Manual, Voice | UI |
+
+### 5.2 Staff Tools
+
+#### 5.2.1 Sales Panel
+| Feature | Description | Algorithm |
+|---------|-------------|-----------|
+| Staff on Duty | Select staff for auto-fill | O(1) |
+| Barcode Scanner (HID) | Auto-detect scanner input | O(1) |
+| Barcode Scanner (Camera) | Tap to scan with phone camera | O(1) |
+| Manual Barcode Entry | Type barcode for lookup | O(1) |
+| Voice Search | Say product name to find | O(n) |
+| Add to Cart | Category + Product selection | O(1) |
+| Batch Sales | Sell by batch (e.g., carton) | O(1) |
+| Cart Management | Add/remove items | O(n) |
+| Cash Payment | Calculate change | O(1) |
+| Loan Sales | Credit sales with customer info | O(1) |
+| Partial Payment | Partial cash allocation | O(n) |
+| Sales Metrics | Today's sales, revenue, first sale | O(1) with cache |
+| Alert Display | Low stock and expiry warnings | O(1) |
+
+#### 5.2.2 Pending Payments Panel
+| Feature | Description | Algorithm |
+|---------|-------------|-----------|
+| Pending List | Open sales (Loan, Partial, Pending) | O(n) |
+| Mark Paid | Resolve pending payment | O(1) |
+| Cancel Sale | Void pending sale | O(1) |
+| Write-off | Mark as loss | O(1) |
+| Today's Sales Log | View/edit today's sales | O(n) |
+| Barcode Search | Find sale by barcode | O(1) |
+
+#### 5.2.3 Stock & Expiry Panel
+| Feature | Description | Algorithm |
+|---------|-------------|-----------|
+| Expiry Watch | Products expiring in 30 days | O(n) |
+| Low Stock Tasks | Products below reorder level | O(n) |
+| Inventory Snapshot | All products with stock | O(n) |
+| Search Products | Filter inventory | O(n) |
+| Pagination | Page through inventory | O(1) |
+| Barcode Search | Find product by barcode | O(1) |
+| Voice Search | Say product name to find | O(n) |
+
+#### 5.2.4 Restock Panel
+| Feature | Description | Algorithm |
+|---------|-------------|-----------|
+| Record Restock | Add incoming stock | O(1) |
+| Barcode Restock | Scan product to restock (HID/Camera) | O(1) |
+| Voice Restock | Say product name to restock | O(n) |
+| Batch Number | Track stock batches | O(1) |
+| Unit Cost | Record cost per unit | O(1) |
+| Expiry Date | Track product expiry | O(1) |
+| Restock Log | Today's restock entries | O(n) |
+| New Products | Products created today | O(n) |
+| Out of Stock | Products with zero stock | O(n) |
+
+#### 5.2.5 Budget Builder Panel
+| Feature | Description | Algorithm |
+|---------|-------------|-----------|
+| Build All | Calculate reorder quantities | O(P log P) |
+| Min/Max Stock | Alert levels and ideal stock | O(1) |
+| Auto Reorder Qty | MaxStock - CurrentStock | O(1) |
+| Adjust Qty | Override auto-calculated | O(1) |
+| Select Items | Choose items for order | O(1) |
+| Generate PO | Create purchase order | O(n) |
+| Export CSV | Download budget as CSV | O(n) |
+| Total Cost | Sum of all reorder costs | O(n) |
+| Supplier | Enter supplier name | O(1) |
+| Notes | Order notes | O(1) |
+| Barcode Add | Scan to add product to budget | O(1) |
+| Voice Add | Say product to add to budget | O(n) |
+
+#### 5.2.6 Product Panel
+| Feature | Description | Algorithm |
+|---------|-------------|-----------|
+| Create Product | Register new product | O(1) |
+| Barcode Assignment | Add barcode to product | O(1) |
+| Category | Select or create new | O(1) |
+| Unit of Measure | Product unit (kg, L, pieces) | O(1) |
+| Unit Price | Selling price | O(1) |
+| Unit Cost | Cost price | O(1) |
+| Reorder Level | Alert threshold | O(1) |
+| ★ Minimum Stock | Alert level | O(1) |
+| ★ Maximum Stock | Ideal stock level | O(1) |
+| Batch Handling | Enable batch sales | O(1) |
+| Batch Measure | Carton, case, box | O(1) |
+| Units in Batch | Quantity per batch | O(1) |
+| Batch Price | Price per batch | O(1) |
+| Batch Number | Initial batch | O(1) |
+| Expiry Date | Product expiry | O(1) |
+| Size Variant | Product variation | O(1) |
+| Storage Condition | Storage requirements | O(1) |
+| Voice Fill | Voice input for form fields | O(1) |
+
+### 5.3 Admin Dashboard
+
+#### 5.3.1 Setup Panel
+| Feature | Description | Algorithm |
+|---------|-------------|-----------|
+| Business Details | Configure business info | O(1) |
+| Business Type | Select category set | O(1) |
+| Province/District | Location configuration | O(1) |
+| Input Methods | Enable/disable HID, Camera, Manual, Voice | O(1) |
+| Sheet Setup | Create all required sheets | O(n) |
+| Categories | Seed business categories | O(n) |
+| Product IDs | Assign missing product IDs | O(n) |
+| Sales Log Schema | Ensure client name/phone | O(1) |
+| Offline Mode | Enable offline capabilities | O(1) |
+| Barcode Config | Enable/disable scanning | O(1) |
+| Voice Config | Enable/disable voice search | O(1) |
+| Support Links | Email and WhatsApp | O(1) |
+
+#### 5.3.2 Inventory Overview Panel
+| Feature | Description | Algorithm |
+|---------|-------------|-----------|
+| Total Products | Count of all products | O(1) |
+| Total Stock Value | Sum of stock value | O(n) |
+| Below Min | Products below min stock | O(n) |
+| At Max | Products at max stock | O(n) |
+| Inventory List | All products with stock | O(n) |
+| Stock Value | Qty × Unit Cost | O(1) |
+| Barcode Lookup | Find product by barcode | O(1) |
+| Voice Search | Say product to find | O(n) |
+| Pagination | Page through inventory | O(1) |
+
+#### 5.3.3 Batch Cost Panel (FIFO)
+| Feature | Description | Algorithm |
+|---------|-------------|-----------|
+| Batch List | All batches for a product | O(B) |
+| FIFO Order | Sorted by purchase date | O(B log B) |
+| COGS Total | Total cost of goods sold | O(n) |
+| Avg Cost/Unit | Average cost per unit | O(1) |
+| Gross Margin | Profit margin percentage | O(1) |
+| Batch Status | Active/Depleted | O(1) |
+| Remaining Stock | Quantity left in batch | O(1) |
+| Purchase Date | When batch was acquired | O(1) |
+| Unit Cost | Cost per unit in batch | O(1) |
+
+#### 5.3.4 Stock Adjustments Panel
+| Feature | Description | Algorithm |
+|---------|-------------|-----------|
+| Adjustment Types | Damage, Theft, Return, Write-off, Breakage, Correction, Sample, Transfer | O(1) |
+| Product Selection | Choose product to adjust | O(1) |
+| Batch Selection | Choose affected batch | O(1) |
+| Barcode Input | Scan product to adjust (HID/Camera) | O(1) |
+| Voice Input | Say product to adjust | O(n) |
+| Cost Impact | Calculated automatically | O(1) |
+| Reason/Notes | Document adjustment | O(1) |
+| Adjustment History | All past adjustments | O(n) |
+| Staff ID | Who made adjustment | O(1) |
+| Status | Pending/Approved/Rejected | O(1) |
+
+### 5.4 Financial Reporting
+
+#### 5.4.1 Daily Ledger
+| Feature | Description |
+|---------|-------------|
+| Total Sales | Sum of daily sales |
+| Discounts | Total discounts given |
+| Net Sales | Sales minus discounts |
+| Cash In | Cash received |
+| Cash Out | Cash paid out |
+| Top Product | Best selling product |
+| Category Breakdown | Sales by category |
+| Staff Totals | Sales by staff member |
+
+#### 5.4.2 Weekly Ledger
+| Feature | Description |
+|---------|-------------|
+| Week Number | ISO week number |
+| Start/End Date | Week range |
+| Total Sales | Weekly total |
+| Net Sales | After discounts |
+| Discounts | Total discounts |
+| Category Mix | Category percentages |
+| Top 5 Products | Best sellers |
+| Restock vs Sales | Restock vs sales comparison |
+| Staff Performance | Staff rankings |
+
+#### 5.4.3 Monthly Ledger
+| Feature | Description |
+|---------|-------------|
+| Month | Year-Month identifier |
+| Total Sales | Monthly total |
+| Net Sales | After discounts |
+| Discounts | Total discounts |
+| Category Contribution | Category percentages |
+| Top 10 Products | Best sellers |
+| Repeat Clients | Returning customers |
+| Restock Frequency | How often restocked |
+| Staff Leaderboard | Staff rankings |
+| Profit Snapshot | Net profit |
+
+### 5.5 Purchase Order Management
+
+| Feature | Description | Algorithm |
+|---------|-------------|-----------|
+| Order ID | Auto-generated PO-YYYY-NNN | O(1) |
+| Status | Draft/Ordered/Partial/Received/Complete/Cancelled | O(1) |
+| Supplier Tracking | Record supplier | O(1) |
+| Expected vs Actual | Compare quantities | O(n) |
+| Total Cost | Expected and actual | O(n) |
+| Item Tracking | Per-item status | O(1) |
+| Receive Stock | Physical count confirmation | O(n) |
+| Barcode Receiving | Scan items on receive (HID/Camera) | O(1) |
+| Voice Receiving | Say item to receive | O(n) |
+| Variance Tracking | Over/under reporting | O(1) |
+| Stock Update | Auto-update on receive | O(n) |
+
+### 5.6 Security & Access Control
+
+| Feature | Description | Algorithm |
+|---------|-------------|-----------|
+| Portal Authentication | Staff/Admin login | O(1) |
+| Password Hashing | SHA-256 with salt | O(1) |
+| Password Not Set | Open access mode | O(1) |
+| Admin Verification | Confirm with admin credentials | O(1) |
+| Session Management | Login state tracking | O(1) |
+| Secure Config | Hidden password column | O(1) |
+
+---
+
+## 6. BARCODE SCANNING SYSTEM
+
+### 6.1 Design Philosophy: Three Input Methods, One Business Logic
+
+TradeFlow Pro supports **three barcode input methods** that all feed into the same `lookupProduct()` function:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                    THREE INPUT METHODS - ONE BUSINESS LOGIC                         │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                                                                                 ││
+│  │  ┌─────────────────┐                                                           ││
+│  │  │                 │                                                           ││
+│  │  │   HID Scanner   │──┐                                                       ││
+│  │  │   (Keyboard)    │  │                                                       ││
+│  │  │   Default       │  │                                                       ││
+│  │  │   Always Active │  │                                                       ││
+│  │  └─────────────────┘  │                                                       ││
+│  │                       │                                                       ││
+│  │  ┌─────────────────┐  │    ┌─────────────────────────────────────────────────┐ ││
+│  │  │                 │  ├───▶│             lookupProduct(barcode)             │ ││
+│  │  │  Camera Scanner │  │    │                                                 │ ││
+│  │  │  (Mobile)       │  │    │  ┌─────────────────────────────────────────────┐ │ ││
+│  │  │  On-Demand      │  │    │  │  • Check cache                             │ │ ││
+│  │  │                 │  │    │  │  • Search ProductMaster                    │ │ ││
+│  │  └─────────────────┘  │    │  │  • Update barcode cache                    │ │ ││
+│  │                       │    │  │  • Return product details                  │ │ ││
+│  │  ┌─────────────────┐  │    │  └─────────────────────────────────────────────┘ │ ││
+│  │  │                 │  │    │                                                 │ ││
+│  │  │  Manual Entry   │──┘    │  ┌─────────────────────────────────────────────┐ │ ││
+│  │  │  (Type)         │       │  │  • Context-specific action                  │ │ ││
+│  │  │                 │       │  │    - Sales → Add to Cart                   │ │ ││
+│  │  └─────────────────┘       │  │    - Restock → Pre-fill form               │ │ ││
+│  │                            │  │    - Search → Show details                 │ │ ││
+│  │  ┌─────────────────┐       │  │    - Budget → Add to budget list           │ │ ││
+│  │  │                 │       │  └─────────────────────────────────────────────┘ │ ││
+│  │  │  Voice Search   │──┘                                                       ││
+│  │  │  (Speech)       │                                                          ││
+│  │  │                 │                                                          ││
+│  │  └─────────────────┘                                                          ││
+│  │                                                                                 ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 6.2 HID Scanner (Default - Always Active)
+
+The HID scanner is the primary input method for professional operations. It's always active and requires no user interaction.
+
+#### 6.2.1 Hidden Input Implementation
+```html
+<!-- Hidden input for HID scanner - always in focus -->
+<input
+    id="barcodeInput"
+    type="text"
+    autocomplete="off"
+    aria-hidden="true"
+    style="
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        opacity: 0;
+        width: 1px;
+        height: 1px;
+        pointer-events: none;
+    "
+>
+```
+
+#### 6.2.2 Focus Management
+```javascript
+function initHIDScanner() {
+    var input = document.getElementById('barcodeInput');
+    
+    // 1. Auto-focus on page load
+    input.focus();
+    
+    // 2. Refocus after any click outside input fields
+    document.addEventListener('click', function(e) {
+        var tag = e.target.tagName.toLowerCase();
+        var isInput = tag === 'input' || tag === 'select' || tag === 'textarea';
+        if (!isInput) {
+            input.focus();
+        }
+    });
+    
+    // 3. Refocus after tab changes
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            input.focus();
+        }
+    });
+    
+    // 4. Input event - process barcode
+    input.addEventListener('input', function(e) {
+        var value = this.value;
+        if (value.length > 0) {
+            // Process after short delay (ensures complete scan)
+            setTimeout(function() {
+                processBarcode(value);
+                input.value = '';
+            }, 50);
+        }
+    });
+    
+    // 5. Enter key fallback
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            var value = this.value;
+            if (value.length > 0) {
+                processBarcode(value);
+                this.value = '';
+            }
+        }
+    });
+}
+```
+
+#### 6.2.3 Scanner Status Indicator
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│  📷 Scanner Status: ● Ready                                                         │
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │  Last scanned: Sugar 2kg (PRD001) - 25.00 ZMW - 2 min ago                    ││
+│  │  Total scans today: 147                                                       ││
+│  │  Success rate: 99.3%                                                          ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 6.3 Camera Scanner (Secondary - On-Demand)
+
+The camera scanner is perfect for businesses without HID scanners or for occasional scans.
+
+#### 6.3.1 Camera Button UI
+```html
+<!-- Search Bar with Camera Button -->
+<div class="search-bar">
+    <button class="btn-voice" id="voiceBtn" title="Voice Search">
+        🎤
+    </button>
+    <input type="text" id="searchInput" placeholder="Search products or type barcode...">
+    <button class="btn-camera" id="cameraBtn" title="Scan Barcode">
+        📷
+    </button>
+</div>
+```
+
+#### 6.3.2 Camera Scanner Implementation
+```javascript
+function initCameraScanner() {
+    var cameraBtn = document.getElementById('cameraBtn');
+    var videoContainer = document.getElementById('videoContainer');
+    var video = document.getElementById('videoElement');
+    var canvas = document.getElementById('canvasElement');
+    var scanResult = document.getElementById('scanResult');
+    
+    cameraBtn.addEventListener('click', function() {
+        // Show camera overlay
+        videoContainer.style.display = 'block';
+        scanResult.textContent = 'Position barcode in frame...';
+        
+        // Start camera
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                } 
+            })
+            .then(function(stream) {
+                video.srcObject = stream;
+                video.play();
+                startBarcodeScanning();
+            })
+            .catch(function(err) {
+                scanResult.textContent = 'Camera access denied. Using manual entry.';
+                closeCamera();
+            });
+        } else {
+            scanResult.textContent = 'Camera not supported on this device.';
+            closeCamera();
+        }
+    });
+}
+
+function startBarcodeScanning() {
+    var video = document.getElementById('videoElement');
+    var canvas = document.getElementById('canvasElement');
+    var context = canvas.getContext('2d');
+    
+    // Scan every 200ms
+    var scanInterval = setInterval(function() {
+        // Capture frame
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        
+        // Use QuaggaJS or ZXing to decode barcode
+        // Simplified - in production use a library
+        var result = decodeBarcode(imageData);
+        if (result) {
+            clearInterval(scanInterval);
+            closeCamera();
+            processBarcode(result);
+        }
+    }, 200);
+    
+    // Store interval for cleanup
+    window._scanInterval = scanInterval;
+}
+
+function closeCamera() {
+    var video = document.getElementById('videoElement');
+    var stream = video.srcObject;
+    if (stream) {
+        var tracks = stream.getTracks();
+        tracks.forEach(function(track) { track.stop(); });
+        video.srcObject = null;
+    }
+    document.getElementById('videoContainer').style.display = 'none';
+    if (window._scanInterval) {
+        clearInterval(window._scanInterval);
+        window._scanInterval = null;
+    }
+}
+```
+
+### 6.4 Manual Entry
+
+The manual entry field supports typing barcodes or product names.
+
+```html
+<!-- Unified search/entry field -->
+<input 
+    type="text" 
+    id="searchInput" 
+    placeholder="Search products or type barcode..."
+    autocomplete="off"
+>
+```
+
+```javascript
+function initManualEntry() {
+    var input = document.getElementById('searchInput');
+    var debounceTimer;
+    
+    input.addEventListener('input', function(e) {
+        var value = this.value.trim();
+        
+        // Clear previous timer
+        clearTimeout(debounceTimer);
+        
+        if (value.length === 0) {
+            clearResults();
+            return;
+        }
+        
+        // Debounce search
+        debounceTimer = setTimeout(function() {
+            // Check if it looks like a barcode (numeric or alphanumeric)
+            if (isBarcodeFormat(value)) {
+                processBarcode(value);
+                input.value = '';
+            } else {
+                // Regular search
+                performSearch(value);
+            }
+        }, 300);
+    });
+}
+```
+
+### 6.5 Context-Dependent Actions
+
+The same barcode input does different things based on the active screen:
+
+```javascript
+function processBarcode(barcode) {
+    var context = getCurrentContext();
+    var product = lookupProduct(barcode);
+    
+    if (!product) {
+        showToast('Product not found: ' + barcode);
+        return;
+    }
+    
+    switch(context) {
+        case 'sales':
+            // Add to cart
+            addToCart(product);
+            playFeedback('beep');
+            showToast('Added: ' + product.productName);
+            break;
+            
+        case 'restock':
+            // Pre-fill restock form
+            prefillRestockForm(product);
+            playFeedback('beep');
+            break;
+            
+        case 'search':
+            // Show product details
+            showProductDetails(product);
+            playFeedback('beep');
+            break;
+            
+        case 'adjustment':
+            // Pre-fill adjustment form
+            prefillAdjustmentForm(product);
+            playFeedback('beep');
+            break;
+            
+        case 'budget':
+            // Add to budget list
+            addToBudget(product);
+            playFeedback('beep');
+            showToast('Added to budget: ' + product.productName);
+            break;
+            
+        case 'receive':
+            // Mark item as received
+            markItemReceived(product);
+            playFeedback('beep');
+            break;
+            
+        default:
+            // Show product details
+            showProductDetails(product);
+    }
+}
+
+function getCurrentContext() {
+    // Check which panel/tab is active
+    var activePanel = document.querySelector('.panel.active');
+    if (!activePanel) return 'search';
+    
+    var id = activePanel.id;
+    if (id === 'salesPanel') return 'sales';
+    if (id === 'restockPanel') return 'restock';
+    if (id === 'staffIssuesPanel') return 'search';
+    if (id === 'budgetPanel') return 'budget';
+    if (id === 'adjustmentsPanel') return 'adjustment';
+    if (id === 'receivePanel') return 'receive';
+    
+    return 'search';
+}
+```
+
+### 6.6 Barcode Data Structure
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| barcode | string | Unique identifier | "8901234567890" |
+| productId | string | Linked product | "PRD001" |
+| productName | string | Product name | "Sugar 2kg" |
+| categoryId | string | Category | "CAT001" |
+| unitPrice | number | Selling price | 25.00 |
+| unitCost | number | Cost price | 20.00 |
+| stock | number | Current stock | 50 |
+| lastScanned | date | Last scan time | 2026-06-30T14:25:30Z |
+| scanCount | number | Total scans | 147 |
+
+### 6.7 Barcode Settings UI
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│  📷 Barcode Scanner Settings                                                        │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │  Input Methods:                                                                 ││
+│  │  ☑ HID Scanner (USB/Bluetooth) - Default, always active                        ││
+│  │  ☑ Camera Scanner (Phone/Tablet) - On-demand                                   ││
+│  │  ☑ Manual Entry (Type) - Always available                                      ││
+│  │                                                                                  ││
+│  │  Scanner Settings:                                                               ││
+│  │  Auto-Add to Cart:   [✅] Automatically add scanned products to cart            ││
+│  │  Sound Feedback:     [✅] Play sound on successful scan                         ││
+│  │  Vibration:          [🔘] Vibrate on scan (mobile)                              ││
+│  │  Duplicate Check:    [✅] Warn if product already in cart                       ││
+│  │  Flashlight:         [🔘] Enable flash for camera scanning                      ││
+│  │                                                                                  ││
+│  │  Scanner Format:                                                                 ││
+│  │  [EAN-13, UPC-A, Code 128, Code 39, QR Code ▼]                                  ││
+│  │                                                                                  ││
+│  │  [💾 Save Settings]  [🔄 Test Scanner]  [📊 Scan Stats]                         ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 6.8 Barcode Database Schema
+
+#### New Sheet: BarcodeLookup
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Barcode | String | Scanned code |
+| B | Product ID | String | Reference to ProductMaster |
+| C | Product Name | String | Denormalized for speed |
+| D | Category ID | String | Reference |
+| E | Unit Price | Number | Current selling price |
+| F | Unit Cost | Number | Current cost price |
+| G | Last Scanned | Date | Last scan timestamp |
+| H | Scan Count | Number | Total scans |
+
+#### New Sheet: BarcodeHistory
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Scan ID | String | Auto-generated |
+| B | Barcode | String | Scanned code |
+| C | Product ID | String | Reference |
+| D | Context | String | sales/restock/search/adjustment |
+| E | Staff ID | String | Who scanned |
+| F | Scanned At | Date | Scan timestamp |
+| G | Success | Boolean | Product found |
+| H | Method | String | HID/Camera/Manual |
+| I | Notes | String | Additional info |
+
+---
+
+## 7. USER SECURITY & ACCESS CONTROL
+
+### 7.1 Authentication Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                         AUTHENTICATION FLOW                                         │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  ┌──────────┐    ┌─────────────┐    ┌─────────────┐                              │
+│  │  Portal  │───▶│  Check Auth │───▶│  Show Login │                              │
+│  │  Click   │    │  Status     │    │  If Required│                              │
+│  └──────────┘    └─────────────┘    └─────────────┘                              │
+│                         │                    │                                      │
+│                         ▼                    ▼                                      │
+│                  ┌─────────────┐    ┌─────────────┐                              │
+│                  │   Open      │    │  Verify     │                              │
+│                  │   Portal    │    │  Credentials│                              │
+│                  └─────────────┘    └─────────────┘                              │
+│                                            │                                      │
+│                                            ▼                                      │
+│                                     ┌─────────────┐                              │
+│                                     │  Grant      │                              │
+│                                     │  Access     │                              │
+│                                     └─────────────┘                              │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 7.2 Password Storage
+
+#### 7.2.1 Hashing Algorithm
+```javascript
+function hashPortalPassword(portal, username, password) {
+  // 1. Create material: portal:username:password
+  const material = portal + ":" + username.toLowerCase() + ":" + password;
+  
+  // 2. SHA-256 hash
+  const digest = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    material,
+    Utilities.Charset.UTF_8
+  );
+  
+  // 3. Convert to hex string
+  return "sha256:" + bytesToHex(digest);
+}
+```
+
+#### 7.2.2 Security Features
+| Feature | Description |
+|---------|-------------|
+| Password Hash | SHA-256 hashed, not stored in plaintext |
+| Salt | Portal + Username acts as salt |
+| Column Hiding | Password column hidden in sheet |
+| NOT_SET Constant | Empty password means open access |
+| Admin Confirmation | Changes require admin verification |
+
+### 7.3 Access Levels
+
+| Level | Permissions |
+|-------|-------------|
+| **Anonymous** | Access to landing portal only |
+| **Staff** | Sales, Restock, Product creation, Budget Builder, Stock viewing, Barcode scanning (HID/Camera/Manual), Voice search |
+| **Admin** | All staff permissions + Dashboard, Staff management, Setup, Adjustments, Batch cost viewing, Barcode config, Voice config |
+
+### 7.4 Security Best Practices
+
+| Practice | Implementation |
+|----------|----------------|
+| SQL Injection | Not applicable (Google Sheets) |
+| XSS Protection | Escape HTML in outputs |
+| CSRF Protection | Apps Script run handlers |
+| Session Security | No persistent sessions, re-authenticate per portal |
+| Data Validation | Server-side validation for all inputs |
+| Audit Trail | All actions logged with timestamps and staff ID |
+| Barcode Security | Validate barcode format before processing |
+
+---
+
+## 8. DATABASE SCHEMA
+
+### 8.1 Sheet Structure
+
+#### 8.1.1 ProductMaster
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Product ID | String | Auto-generated PRD001 |
+| B | Product Name | String | Display name |
+| C | Category ID | String | Reference to ProductCategoryConfig |
+| D | Brand | String | Brand/Staff ID |
+| E | Supplier | String | Supplier name |
+| F | ★ Barcode | String | Product barcode |
+| G | Unit Measure | String | kg, L, pieces |
+| H | Unit Price | Number | Selling price |
+| I | Unit Cost | Number | Cost price |
+| J | Reorder Level | Number | Alert threshold |
+| K | Batch Number | String | Current batch |
+| L | Expiry Date | Date | Product expiry |
+| M | Storage Condition | String | Storage requirements |
+| N | Size Variant | String | Size or variant |
+| O | Created At | Date | Creation timestamp |
+| P | Batch Handled | Boolean | Batch sale enabled |
+| Q | Batch Measure | String | Carton, case, box |
+| R | Units per Batch | Number | Quantity per batch |
+| S | Batch Price | Number | Price per batch |
+| T | ★ Minimum Stock | Number | Alert level |
+| U | ★ Maximum Stock | Number | Ideal stock level |
+
+#### 8.1.2 SalesLog
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Sale ID | String | SL + YYMMDDHHMMSS |
+| B | Date of Sale | Date | Transaction date |
+| C | Product ID | String | Reference to ProductMaster |
+| D | Product Name | String | Denormalized |
+| E | Category ID | String | Reference |
+| F | Unit of Measure | String | Denormalized |
+| G | Qty | Number | Quantity sold |
+| H | Unit Price | Number | Selling price |
+| I | Gross | Number | Qty × Unit Price |
+| J | Staff ID | String | Staff who processed |
+| K | Status | String | Paid/Pending/Loan/PartialPaid/Cancelled/WriteOff |
+| L | Notes | JSON | Metadata, batch info, client |
+| M | Client Name | String | Customer name |
+| N | Client Phone | String | Customer phone |
+| O | ★ Barcode | String | Scanned barcode |
+| P | ★ Voice Query | String | Voice search query if used |
+
+#### 8.1.3 RestockProductLog
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Date Restocked | Date | When stock was added |
+| B | Product ID | String | Reference to ProductMaster |
+| C | Product Name | String | Denormalized |
+| D | Category ID | String | Reference |
+| E | Qty Added | Number | Quantity added |
+| F | Batch Number | String | Batch identifier |
+| G | Expiry Date | Date | Product expiry |
+| H | Staff ID | String | Who restocked |
+| I | Unit Cost | Number | Cost per unit |
+| J | ★ Barcode | String | Scanned barcode |
+| K | ★ Voice Query | String | Voice search query if used |
+
+#### 8.1.4 StaffMaster
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Staff ID | String | Auto-generated ST001 |
+| B | Full Name | String | Display name |
+| C | Role | String | Job title |
+| D | Phone Number | String | Contact |
+| E | Email | String | Unique identifier |
+| F | Status | String | Active/Inactive/On Leave |
+
+#### 8.1.5 ProductCategoryConfig
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Category ID | String | Auto-generated CAT001 |
+| B | Category Name | String | Display name |
+
+#### 8.1.6 SafeConfig (Portal Security)
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Date Changed | Date | Last update |
+| B | Portai | String | staff/admin |
+| C | User Name | String | Portal username |
+| D | Password | String | SHA-256 hash or NOT_SET |
+
+#### 8.1.7 BusinessConfig
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Config Key | String | Setting name |
+| B | Config Value | String | Setting value |
+| C | Updated At | Date | Last update |
+
+#### 8.1.8 BarcodeLookup
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Barcode | String | Scanned code |
+| B | Product ID | String | Reference |
+| C | Product Name | String | Denormalized |
+| D | Category ID | String | Reference |
+| E | Unit Price | Number | Current price |
+| F | Unit Cost | Number | Current cost |
+| G | Last Scanned | Date | Last scan timestamp |
+| H | Scan Count | Number | Total scans |
+
+#### 8.1.9 BarcodeHistory
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Scan ID | String | Auto-generated |
+| B | Barcode | String | Scanned code |
+| C | Product ID | String | Reference |
+| D | Context | String | sales/restock/search/adjustment |
+| E | Staff ID | String | Who scanned |
+| F | Scanned At | Date | Scan timestamp |
+| G | Success | Boolean | Product found |
+| H | Method | String | HID/Camera/Manual |
+| I | Notes | String | Additional info |
+
+#### 8.1.10 VoiceSearchLog
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Query ID | String | Auto-generated |
+| B | Voice Query | String | Spoken text |
+| C | Matched Product | String | Best match |
+| D | Confidence | Number | Recognition confidence |
+| E | Staff ID | String | Who spoke |
+| F | Created At | Date | Query timestamp |
+| G | Context | String | sales/restock/search |
+
+#### 8.1.11 DailyLedger
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Date | Date | Day |
+| B | Total Sales | Number | Sum of all sales |
+| C | Discounts | Number | Total discounts |
+| D | Net Sales | Number | Sales - Discounts |
+| E | Cash In | Number | Cash received |
+| F | Cash Out | Number | Cash paid out |
+| G | Top Product | String | Best seller |
+| H | Category Breakdown | JSON | Sales by category |
+| I | Staff Totals | JSON | Sales by staff |
+
+#### 8.1.12 WeeklyLedger
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Week Number | String | YYYY-WW |
+| B | Start Date | Date | Week start |
+| C | End Date | Date | Week end |
+| D | Total Sales | Number | Weekly total |
+| E | Net Sales | Number | After discounts |
+| F | Discounts | Number | Total discounts |
+| G | Category Mix | JSON | Category percentages |
+| H | Top 5 Products | JSON | Best sellers |
+| I | Restock vs Sales | JSON | Comparison |
+| J | Staff Performance | JSON | Staff rankings |
+
+#### 8.1.13 MonthlyLedger
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Month | String | YYYY-MM |
+| B | Total Sales | Number | Monthly total |
+| C | Net Sales | Number | After discounts |
+| D | Discounts | Number | Total discounts |
+| E | Category Contribution | JSON | Category percentages |
+| F | Top 10 Products | JSON | Best sellers |
+| G | Repeat Clients | Number | Returning customers |
+| H | Restock Frequency | JSON | Restock counts |
+| I | Staff Leaderboard | JSON | Staff rankings |
+| J | Profit Snapshot | Number | Net profit |
+
+#### 8.1.14 PurchaseOrders
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Order ID | String | PO-2026-001 |
+| B | Created At | Date | Order creation |
+| C | Supplier | String | Supplier name |
+| D | Status | String | Draft/Ordered/Partial/Received/Complete/Cancelled |
+| E | Total Expected Cost | Number | Sum of expected |
+| F | Total Actual Cost | Number | Sum of actual |
+| G | Created By | String | Staff ID |
+| H | Notes | String | Order notes |
+
+#### 8.1.15 PurchaseOrderItems
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Order ID | String | Reference |
+| B | Item ID | String | ITEM-001 |
+| C | Product ID | String | Reference |
+| D | Product Name | String | Denormalized |
+| E | ★ Barcode | String | Product barcode |
+| F | Expected Qty | Number | Planned quantity |
+| G | Actual Qty | Number | Received quantity |
+| H | Unit Cost | Number | Cost per unit |
+| I | Total Cost | Number | Qty × Unit Cost |
+| J | Purchased | Boolean | Received flag |
+| K | Received At | Date | When received |
+| L | Notes | String | Item notes |
+
+#### 8.1.16 StockAdjustments
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Adjustment ID | String | ADJ-2026-001 |
+| B | Product ID | String | Reference |
+| C | Batch ID | String | Reference |
+| D | ★ Barcode | String | Product barcode |
+| E | Adjustment Type | String | damage/theft/return/writeoff/breakage/correction/sample/transfer |
+| F | Quantity | Number | Adjusted qty |
+| G | Unit Cost | Number | Cost per unit |
+| H | Total Cost | Number | Qty × Unit Cost |
+| I | Reason | String | Adjustment reason |
+| J | Staff ID | String | Who adjusted |
+| K | Created At | Date | When adjusted |
+| L | Status | String | Pending/Approved/Rejected |
+| M | ★ Voice Query | String | Voice search query if used |
+
+#### 8.1.17 BatchCosts
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Batch ID | String | BYYYY-NNN or B-PRD001-YYYYMMDD |
+| B | Product ID | String | Reference |
+| C | Purchase Date | Date | When acquired |
+| D | Supplier | String | Supplier name |
+| E | Quantity Purchased | Number | Initial qty |
+| F | Unit Cost | Number | Cost per unit |
+| G | Total Cost | Number | Qty × Unit Cost |
+| H | Remaining | Number | Stock left |
+| I | Status | String | Active/Completed |
+
+#### 8.1.18 SalesCostAllocation (FIFO)
+| Column | Name | Type | Description |
+|--------|------|------|-------------|
+| A | Sale ID | String | Reference to SalesLog |
+| B | Batch ID | String | Reference to BatchCosts |
+| C | Product ID | String | Reference |
+| D | Quantity | Number | Units from this batch |
+| E | Unit Cost | Number | Cost for this batch |
+| F | Total Cost | Number | Qty × Unit Cost |
+
+### 8.2 Relationships
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                         ENTITY RELATIONSHIP DIAGRAM                                 │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  BusinessConfig ◄───► ProductCategoryConfig ◄───► ProductMaster ◄───┐            │
+│                              │                   │                   │            │
+│                              ▼                   ▼                   │            │
+│                         StaffMaster ◄────────────┐                   │            │
+│                              │                   │                   │            │
+│                              ▼                   ▼                   ▼            │
+│                         RestockLog ────────► SalesLog ◄─────────────┘            │
+│                              │                   │                                 │
+│                              ▼                   ▼                                 │
+│                         BatchCosts ◄─────── SalesCostAllocation                    │
+│                              │                   │                                 │
+│                              ▼                   ▼                                 │
+│                    BarcodeLookup ◄─────── BarcodeHistory                           │
+│                              │                   │                                 │
+│                              ▼                   ▼                                 │
+│                    VoiceSearchLog ◄─────── VoiceSearchCache                        │
+│                                                                                     │
+│  PurchaseOrders ◄───► PurchaseOrderItems                                           │
+│                              │                                                      │
+│                              ▼                                                      │
+│                         StockAdjustments                                           │
+│                                                                                     │
+│  DailyLedger ◄───► WeeklyLedger ◄───► MonthlyLedger                               │
+│                                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 9. WORKFLOW DIAGRAMS
+
+### 9.1 Sales Workflow with Barcode & Voice
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                  SALES WORKFLOW WITH BARCODE & VOICE                                │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         INPUT METHODS                                           ││
+│  │                                                                                  ││
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      ││
+│  │  │  HID Scanner │  │  Camera Scan │  │  Manual Entry│  │  Voice Search│      ││
+│  │  │  (Default)   │  │  (On-Demand) │  │  (Type)     │  │  (Speech)    │      ││
+│  │  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘      ││
+│  │         │                 │                 │                 │               ││
+│  │         └─────────────────┴─────────────────┴─────────────────┘               ││
+│  │                                   │                                            ││
+│  │                                   ▼                                            ││
+│  │                          ┌─────────────────┐                                  ││
+│  │                          │ lookupProduct() │                                  ││
+│  │                          └─────────────────┘                                  ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+│                                   │                                                  │
+│                                   ▼                                                  │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         CONTEXT ACTIONS                                         ││
+│  │                                                                                  ││
+│  │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ ││
+│  │  │  Sales Panel │    │  Restock     │    │  Search      │    │  Budget      │ ││
+│  │  │  → Add to    │    │  Panel       │    │  Panel       │    │  Panel       │ ││
+│  │  │    Cart      │    │  → Pre-fill  │    │  → Show      │    │  → Add to    │ ││
+│  │  │              │    │    Form      │    │    Details   │    │    Budget    │ ││
+│  │  └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘ ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+│                                   │                                                  │
+│                                   ▼                                                  │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         CART OPERATIONS                                         ││
+│  │                                                                                  ││
+│  │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ ││
+│  │  │  Review      │───▶│  Enter       │───▶│  Submit      │───▶│  Log Sale    │ ││
+│  │  │  Cart        │    │  Payment     │    │  Sale        │    │  (FIFO)      │ ││
+│  │  └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘ ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 9.2 Barcode Scanner Workflow (HID)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                    HID SCANNER WORKFLOW (DEFAULT)                                   │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         SCANNER STATE                                            ││
+│  │                                                                                  ││
+│  │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ ││
+│  │  │  Always      │───▶│  Hidden      │───▶│  Input       │───▶│  Process     │ ││
+│  │  │  Focused     │    │  Input       │    │  Event       │    │  Barcode     │ ││
+│  │  └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘ ││
+│  │         │                                                         │            ││
+│  │         │                                                         ▼            ││
+│  │         │                 ┌───────────────────────────────────────────────────┐ ││
+│  │         └────────────────▶│              User Experience                    │ ││
+│  │                           │                                                  │ ││
+│  │                           │  • No clicks needed                             │ ││
+│  │                           │  • Just scan - product appears                  │ ││
+│  │                           │  • Continuous scanning                         │ ││
+│  │                           │  • Supermarket speed                           │ ││
+│  │                           └───────────────────────────────────────────────────┘ ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         TYPICAL CHECKOUT FLOW                                   ││
+│  │                                                                                  ││
+│  │  Customer approaches counter                                                   ││
+│  │       │                                                                         ││
+│  │       ▼                                                                         ││
+│  │  Staff scans product (Beep) → Appears in cart                                 ││
+│  │       │                                                                         ││
+│  │       ▼                                                                         ││
+│  │  Customer puts items down                                                      ││
+│  │       │                                                                         ││
+│  │       ▼                                                                         ││
+│  │  Staff scans next product (Beep) → Another row added                          ││
+│  │       │                                                                         ││
+│  │       ▼                                                                         ││
+│  │  ... 20 items scanned in 15 seconds                                           ││
+│  │       │                                                                         ││
+│  │       ▼                                                                         ││
+│  │  Cash handed → Change calculated → Sale complete                              ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 9.3 Camera Scanner Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                    CAMERA SCANNER WORKFLOW (ON-DEMAND)                              │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         USER JOURNEY                                            ││
+│  │                                                                                  ││
+│  │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ ││
+│  │  │  Tap Camera  │───▶│  Camera      │───▶│  Position    │───▶│  Scan        │ ││
+│  │  │  Button      │    │  Opens       │    │  Barcode     │    │  Completes   │ ││
+│  │  └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘ ││
+│  │                                                                                  ││
+│  │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ ││
+│  │  │  Product     │───▶│  Auto-Add    │───▶│  Camera      │───▶│  Ready for   │ ││
+│  │  │  Found       │    │  to Cart     │    │  Closes      │    │  Next Scan   │ ││
+│  │  └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘ ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         CAMERA UI                                               ││
+│  │                                                                                  ││
+│  │  ┌─────────────────────────────────────────────────────────────────────────────┐││
+│  │  │  📷 Scanning...                                                             │││
+│  │  │                                                                             │││
+│  │  │  ┌─────────────────────────────────────────────────────────────────────────┐ │││
+│  │  │  │                                                                         │ │││
+│  │  │  │                    [BARCODE IN FRAME]                                   │ │││
+│  │  │  │                                                                         │ │││
+│  │  │  │                                                                         │ │││
+│  │  │  └─────────────────────────────────────────────────────────────────────────┘ │││
+│  │  │                                                                             │││
+│  │  │  Position barcode in the frame to scan                                     │││
+│  │  │  [✕ Cancel]  [💡 Flash]  [📷 Capture]                                     │││
+│  │  └─────────────────────────────────────────────────────────────────────────────┘││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 9.4 Voice Search Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                         VOICE SEARCH WORKFLOW                                       │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         USER JOURNEY                                            ││
+│  │                                                                                  ││
+│  │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ ││
+│  │  │  Tap Voice   │───▶│  "Say product│───▶│  Speech to   │───▶│  Search      │ ││
+│  │  │  Button      │    │   name"      │    │  Text        │    │  Products    │ ││
+│  │  └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘ ││
+│  │                                                                                  ││
+│  │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ ││
+│  │  │  Select      │───▶│  Add to      │───▶│  Ready for   │───▶│  Hands-free  │ ││
+│  │  │  Product     │    │  Cart        │    │  Next Query  │    │  Operation   │ ││
+│  │  └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘ ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         VOICE UI                                                ││
+│  │                                                                                  ││
+│  │  ┌─────────────────────────────────────────────────────────────────────────────┐││
+│  │  │  🎤 Listening...                                                            │││
+│  │  │                                                                             │││
+│  │  │  ┌─────────────────────────────────────────────────────────────────────────┐ │││
+│  │  │  │  "Sugar 2kg"                                                            │ │││
+│  │  │  │                                                                         │ │││
+│  │  │  │  Results:                                                               │ │││
+│  │  │  │  ┌─────────────────────────────────────────────────────────────────────┐│ │││
+│  │  │  │  │  🟢 Sugar 2kg (PRD001) - 25.00 ZMW - 50 in stock                  ││ │││
+│  │  │  │  │  🔵 Brown Sugar 1kg (PRD045) - 18.00 ZMW - 32 in stock            ││ │││
+│  │  │  │  │  ⚪ Sugar Cubes (PRD089) - 12.00 ZMW - 15 in stock                ││ │││
+│  │  │  │  └─────────────────────────────────────────────────────────────────────┘│ │││
+│  │  │  └─────────────────────────────────────────────────────────────────────────┘ │││
+│  │  │                                                                             │││
+│  │  │  [✕ Cancel]  [🔊 Speak Again]                                             │││
+│  │  └─────────────────────────────────────────────────────────────────────────────┘││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 9.5 Budget Builder Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                      BUDGET BUILDER WORKFLOW                                        │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                        │
+│  │  Build All   │───▶│  Calculate   │───▶│  Review      │                        │
+│  │  (Generate)  │    │  Reorder Qty │    │  Items       │                        │
+│  └──────────────┘    └──────────────┘    └──────────────┘                        │
+│                                   │               │                                │
+│                                   ▼               ▼                                │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                        │
+│  │  Generate    │◄───│  Select      │◄───│  Adjust      │                        │
+│  │  Purchase    │    │  Items       │    │  Quantities  │                        │
+│  │  Order       │    │              │    │              │                        │
+│  └──────────────┘    └──────────────┘    └──────────────┘                        │
+│        │                                                                           │
+│        ▼                                                                           │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                        │
+│  │  Create PO   │───▶│  Add Items   │───▶│  Set Status  │                        │
+│  │  Record      │    │  to Sheet    │    │  to Ordered  │                        │
+│  └──────────────┘    └──────────────┘    └──────────────┘                        │
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         INPUT METHODS IN BUDGET                                 ││
+│  │                                                                                  ││
+│  │  • Scan barcode → Add product to budget list                                   ││
+│  │  • Say product name → Add product to budget list                               ││
+│  │  • Type product name → Add product to budget list                              ││
+│  │                                                                                  ││
+│  │  Same product search, different input methods                                  ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 9.6 Stock Receiving with Barcode Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                  STOCK RECEIVING WITH BARCODE WORKFLOW                              │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                        │
+│  │  Select PO   │───▶│  Load Items  │───▶│  Scan Items  │                        │
+│  │  to Receive  │    │  Expected    │    │  to Receive  │                        │
+│  └──────────────┘    └──────────────┘    └──────────────┘                        │
+│                                                  │                                │
+│                                                  ▼                                │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                        │
+│  │  Confirm     │◄───│  Review      │◄───│  Calculate   │                        │
+│  │  Receiving   │    │  Variance    │    │  Difference  │                        │
+│  └──────────────┘    └──────────────┘    └──────────────┘                        │
+│        │                                                                           │
+│        ▼                                                                           │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                        │
+│  │  Create      │───▶│  Update      │───▶│  Update      │                        │
+│  │  Restock     │    │  Batch       │    │  Barcode     │                        │
+│  │  Logs        │    │  Remaining   │    │  Lookup      │                        │
+│  └──────────────┘    └──────────────┘    └──────────────┘                        │
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         RECEIVING EXPERIENCE                                    ││
+│  │                                                                                  ││
+│  │  Staff receives pallet of goods                                                ││
+│  │       │                                                                         ││
+│  │       ▼                                                                         ││
+│  │  Scans each carton (Beep, Beep, Beep)                                         ││
+│  │       │                                                                         ││
+│  │       ▼                                                                         ││
+│  │  System tracks expected vs actual                                              ││
+│  │       │                                                                         ││
+│  │       ▼                                                                         ││
+│  │  One click: Confirm all → Stock updated                                       ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 9.7 Stock Adjustment with Barcode Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                  STOCK ADJUSTMENT WITH BARCODE WORKFLOW                             │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                        │
+│  │  Scan        │───▶│  Select      │───▶│  Select      │                        │
+│  │  Product     │    │  Batch       │    │  Type        │                        │
+│  └──────────────┘    └──────────────┘    └──────────────┘                        │
+│                                                  │                                │
+│                                                  ▼                                │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                        │
+│  │  Enter       │───▶│  Add Reason  │───▶│  Calculate   │                        │
+│  │  Quantity    │    │  / Notes     │    │  Cost        │                        │
+│  └──────────────┘    └──────────────┘    └──────────────┘                        │
+│                                                  │                                │
+│                                                  ▼                                │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                        │
+│  │  Confirm     │───▶│  Update      │───▶│  Log to      │                        │
+│  │  Adjustment  │    │  Batch       │    │  History     │                        │
+│  └──────────────┘    └──────────────┘    └──────────────┘                        │
+│                                  │                                                 │
+│                                  ▼                                                 │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                        │
+│  │  Create      │───▶│  Update      │───▶│  Update      │                        │
+│  │  Negative    │    │  Stock       │    │  Barcode     │                        │
+│  │  Restock     │    │  Map Cache   │    │  Lookup      │                        │
+│  └──────────────┘    └──────────────┘    └──────────────┘                        │
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         ADJUSTMENT SCENARIOS                                    ││
+│  │                                                                                  ││
+│  │  Damage:   Scan product → Select "Damage" → Enter qty → Confirm                ││
+│  │  Theft:    Scan product → Select "Theft" → Enter qty → Confirm                 ││
+│  │  Return:   Scan product → Select "Return" → Enter qty → Confirm                ││
+│  │  Write-off: Scan product → Select "Write-off" → Enter qty → Confirm           ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 9.8 FIFO Cost Allocation Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                   FIFO COST ALLOCATION WORKFLOW                                     │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                        │
+│  │  Product     │───▶│  Get Active  │───▶│  Sort by     │                        │
+│  │  Sale        │    │  Batches     │    │  Date (Oldest│                        │
+│  └──────────────┘    └──────────────┘    │  First)      │                        │
+│                                                   │                                │
+│                                                   ▼                                │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                        │
+│  │  Deduct      │◄───│  Calculate   │◄───│  For Each    │                        │
+│  │  from Oldest │    │  Allocation  │    │  Batch       │                        │
+│  │  Batch       │    │  per Batch   │    │  in Order    │                        │
+│  └──────────────┘    └──────────────┘    └──────────────┘                        │
+│        │                                                                           │
+│        ▼                                                                           │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                        │
+│  │  Update      │───▶│  Log to      │───▶│  Complete    │                        │
+│  │  Batch       │    │  SalesCost   │    │  Sale        │                        │
+│  │  Remaining   │    │  Allocation  │    │  Record      │                        │
+│  └──────────────┘    └──────────────┘    └──────────────┘                        │
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         FIFO EXAMPLE                                            ││
+│  │                                                                                  ││
+│  │  Sugar 2kg - Sale of 30 units                                                  ││
+│  │                                                                                  ││
+│  │  Batch 1 (Oldest): 15 units @ 20.00 = 300.00 ← Used first                     ││
+│  │  Batch 2:          15 units @ 22.00 = 330.00 ← Used second                    ││
+│  │  Batch 3 (Newest): 0 units @ 24.00 = 0.00                                     ││
+│  │                                                                                  ││
+│  │  Total COGS: 630.00                                                            ││
+│  │  Sale Price: 30 × 25.00 = 750.00                                               ││
+│  │  Gross Profit: 120.00                                                          ││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 10. API REFERENCE
+
+### 10.1 Sales APIs
+
+| Function | Parameters | Returns | Description |
+|----------|-----------|---------|-------------|
+| `addPendingSaleRow` | `{productId, qty, unitPrice, staffId, saleMode, notes, barcode, voiceQuery}` | `{error, saleId, message}` | Add item to cart |
+| `finalizePendingRows` | `{saleIds, cashHanded, change, userNotes, clientName, clientPhone}` | `{error, message}` | Complete cash sale |
+| `finalizeLoanRows` | `{saleIds, clientName, clientPhone, userNotes, staffId}` | `{error, message}` | Complete loan sale |
+| `finalizePartialCartRows` | `{allocations, cashHanded, change, userNotes, clientName, clientPhone}` | `{error, message}` | Complete partial payment |
+| `getTodaySalesLog` | None | `{rows: [{saleId, productName, gross, status}]}` | Today's sales |
+
+### 10.2 Barcode APIs
+
+| Function | Parameters | Returns | Description |
+|----------|-----------|---------|-------------|
+| `lookupProductByBarcode` | `{barcode}` | `{productId, productName, unitPrice, stock}` | Find product by barcode |
+| `addBarcodeToProduct` | `{productId, barcode}` | `{message}` | Assign barcode to product |
+| `getBarcodeHistory` | `{productId, limit}` | `[{barcode, scannedAt, context, method}]` | Barcode scan history |
+| `updateBarcodeCache` | `{barcode, productId}` | `{message}` | Update barcode lookup cache |
+| `validateBarcode` | `{barcode}` | `{valid, format}` | Validate barcode format |
+
+### 10.3 Voice APIs
+
+| Function | Parameters | Returns | Description |
+|----------|-----------|---------|-------------|
+| `voiceSearch` | `{query, context}` | `[{productId, productName, score}]` | Search by voice |
+| `logVoiceQuery` | `{query, matchedProduct, confidence, context, staffId}` | `{message}` | Log voice search |
+| `getVoiceHistory` | `{limit}` | `[{query, matchedProduct, confidence}]` | Voice search history |
+
+### 10.4 Inventory APIs
+
+| Function | Parameters | Returns | Description |
+|----------|-----------|---------|-------------|
+| `getStockForProduct` | `{productId}` | `number` | Current stock |
+| `logRestock` | `{productId, productName, categoryId, qtyAdded, batchNumber, expiryDate, unitCost, staffId, barcode, voiceQuery}` | `{error, message}` | Record restock |
+| `getTodayRestockLog` | None | `{rows: [{productName, qtyAdded, batchNumber}]}` | Today's restocks |
+| `getProductsByCategory` | `{categoryId, stockFilter}` | `[{productId, productName}]` | Products in category |
+| `getProductById` | `{productId}` | `{productId, productName, unitPrice}` | Single product |
+
+### 10.5 Budget APIs
+
+| Function | Parameters | Returns | Description |
+|----------|-----------|---------|-------------|
+| `buildBudget` | None | `{items: [{productId, productName, reorderQty, totalCost}]}` | Calculate reorder qty |
+| `generatePurchaseOrder` | `{items: [{productId, quantity, unitCost}], supplier, notes}` | `{orderId, totalCost}` | Create purchase order |
+| `getPurchaseOrders` | None | `{orders: [{orderId, supplier, status, totalCost}]}` | List purchase orders |
+| `getPurchaseOrder` | `{orderId}` | `{orderId, items: [{productName, expectedQty, actualQty}]}` | Get order details |
+| `confirmStockReceiving` | `{orderId, items: [{productId, actualQty}], staffId}` | `{status, restockLogs}` | Confirm receiving |
+
+### 10.6 Adjustment APIs
+
+| Function | Parameters | Returns | Description |
+|----------|-----------|---------|-------------|
+| `recordStockAdjustment` | `{productId, batchId, adjustmentType, quantity, reason, staffId, barcode, voiceQuery}` | `{adjustmentId, costImpact}` | Record adjustment |
+| `getAdjustmentHistory` | None | `{adjustments: [{productId, adjustmentType, quantity, costImpact}]}` | List adjustments |
+| `getProductBatches` | `{productId}` | `{batches: [{batchId, remaining, unitCost}]}` | Get product batches |
+
+### 10.7 Batch Cost APIs
+
+| Function | Parameters | Returns | Description |
+|----------|-----------|---------|-------------|
+| `getBatchCosts` | `{productId}` | `{batches: [{batchId, unitCost, remaining}], totalValue, salesRevenue}` | FIFO batch costs |
+| `getAdminInventory` | None | `{inventory: [{productId, stock, minStock, maxStock}], totalValue}` | Inventory snapshot |
+
+### 10.8 Staff APIs
+
+| Function | Parameters | Returns | Description |
+|----------|-----------|---------|-------------|
+| `addStaffRow` | `{fullName, role, phoneNumber, email, status}` | `{staffId, message}` | Add staff member |
+| `updateStaffStatus` | `{staffId, status}` | `{message}` | Update staff status |
+| `getStaffList` | None | `[{staffId, fullName, status}]` | List all staff |
+
+### 10.9 Product APIs
+
+| Function | Parameters | Returns | Description |
+|----------|-----------|---------|-------------|
+| `addProductRow` | `{productName, categoryId, unitMeasure, unitPrice, unitCost, reorderLevel, minStock, maxStock, batchHandled, batchMeasure, batchUnits, batchPrice, batchNumber, expiryDate, storageCondition, sizeVariant, staffId, barcode}` | `{productId, message}` | Create product |
+| `updateProductRow` | `{rowIndex, productName, categoryId, unitMeasure, unitPrice, unitCost, reorderLevel, minStock, maxStock, barcode}` | `{message}` | Update product |
+| `getProductsList` | None | `{products: [{productId, productName, stock, barcode}]}` | All products |
+
+### 10.10 Ledger APIs
+
+| Function | Parameters | Returns | Description |
+|----------|-----------|---------|-------------|
+| `recordDailyLedger` | `{targetDate}` | `{message}` | Generate daily ledger |
+| `recordWeeklyLedger` | `{targetDate}` | `{message}` | Generate weekly ledger |
+| `recordMonthlyLedger` | `{targetDate}` | `{message}` | Generate monthly ledger |
+
+### 10.11 Admin APIs
+
+| Function | Parameters | Returns | Description |
+|----------|-----------|---------|-------------|
+| `runSetup` | None | `{message, createdSheets}` | Create all sheets |
+| `setupBusiness` | `{businessName, businessType, ownerName, whatsappNumber, emailAddress, province, district, physicalAddress, inputMethods}` | `{message, categories}` | Configure business |
+| `getAppSettings` | None | `{businessName, setupCompletedAt, businessType, inputMethods}` | Get settings |
+| `setBusinessName` | `{businessName}` | `{message}` | Set business name |
+| `updatePortalCredential` | `{portal, requirePassword, username, password, adminUsername, adminPassword}` | `{message}` | Update portal auth |
+
+---
+
+## 11. PERFORMANCE & CACHING
+
+### 11.1 Cache Strategy Summary
+
+| Data Type | Cache Location | TTL | Invalidation Trigger |
+|-----------|---------------|-----|---------------------|
+| Barcode Lookup | Server (CacheService) | 3600s | Barcode assignment/update |
+| Voice Search | sessionStorage | 300s | Recent voice queries |
+| Stock Map | Server (CacheService) | 90s | Sale, Restock, Adjustment |
+| Categories | Server (CacheService) | 600s | Category creation |
+| Staff List | Server (CacheService) | 300s | Staff add/update |
+| App Settings | Server (CacheService) | 600s | Settings update |
+| Dashboard | Server (CacheService) | 45s | Sale, Restock, Stock change |
+| Products | Client (sessionStorage) | 120s | Product add/update |
+| Barcode Cache | Client (sessionStorage) | 300s | Scan or product change |
+
+### 11.2 Performance Optimizations
+
+| Optimization | Description | Impact |
+|--------------|-------------|--------|
+| Barcode Lookup Cache | Store barcode-product mapping | Instant product lookup |
+| Voice Search Cache | Cache recent voice searches | Faster repeated searches |
+| Batch Reads | Read multiple cells at once | 10x faster than single cells |
+| Cache Service | Server-side caching | 100x faster than sheet reads |
+| sessionStorage | Client-side caching | Instant load times |
+| Minimal DOM Updates | Only update changed elements | Faster UI rendering |
+| Debouncing | Limit API calls on input | Reduced server load |
+| Pagination | Load data in chunks | Faster initial load |
+| Lazy Loading | Load on demand | Faster startup |
+| Barcode Buffer | Accumulate scanner input | No keypress handling overhead |
+
+### 11.3 Time Complexity Summary
+
+| Operation | Time Complexity | Space Complexity |
+|-----------|----------------|------------------|
+| Barcode Lookup | O(1) with cache | O(1) |
+| Voice Search | O(n log n) | O(n) |
+| Stock Calculation | O(R + S) | O(P) |
+| FIFO Allocation | O(B log B) | O(B) |
+| Budget Builder | O(P log P) | O(P) |
+| ID Generation | O(N) | O(1) |
+| Cart Operations | O(n) | O(n) |
+| Ledger Generation | O(n log n) | O(n) |
+| Dashboard Load | O(P + S + R) | O(P + S + R) |
+
+---
+
+## 12. OFFLINE CAPABILITIES
+
+### 12.1 Offline Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                           OFFLINE ARCHITECTURE                                      │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         SERVICE WORKER                                          ││
+│  │  ┌─────────────────────────────────────────────────────────────────────────────┐││
+│  │  │  Cache API: tradeflow-app-shell-v2                                         │││
+│  │  │  - ./ (index.html)                                                         │││
+│  │  │  - ?asset=manifest                                                         │││
+│  │  │  - ?asset=icon                                                             │││
+│  │  │  - ?asset=sw (service worker)                                              │││
+│  │  │  - ?asset=voice (voice model)                                              │││
+│  │  └─────────────────────────────────────────────────────────────────────────────┘││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+│                                    │                                                  │
+│                                    ▼                                                  │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         INDEXEDDB                                               ││
+│  │  ┌─────────────────────────────────────────────────────────────────────────────┐││
+│  │  │  Database: tradeflow-offline-db (v2)                                       │││
+│  │  │  ┌─────────────────────────────────────────────────────────────────────────┐│││
+│  │  │  │  Store: pendingOperations                                              ││││
+│  │  │  │  - methodName: string                                                  ││││
+│  │  │  │  - data: object                                                        ││││
+│  │  │  │  - timestamp: number                                                   ││││
+│  │  │  │  - retries: number                                                     ││││
+│  │  │  │  - barcode: string (if applicable)                                     ││││
+│  │  │  │  - voiceQuery: string (if applicable)                                  ││││
+│  │  │  └─────────────────────────────────────────────────────────────────────────┘│││
+│  │  │  ┌─────────────────────────────────────────────────────────────────────────┐│││
+│  │  │  │  Store: barcodeCache                                                   ││││
+│  │  │  │  - barcode: string                                                     ││││
+│  │  │  │  - productId: string                                                   ││││
+│  │  │  │  - productName: string                                                 ││││
+│  │  │  │  - unitPrice: number                                                   ││││
+│  │  │  │  - cachedAt: number                                                    ││││
+│  │  │  └─────────────────────────────────────────────────────────────────────────┘│││
+│  │  │  ┌─────────────────────────────────────────────────────────────────────────┐│││
+│  │  │  │  Store: voiceCache                                                     ││││
+│  │  │  │  - query: string                                                       ││││
+│  │  │  │  - results: array                                                      ││││
+│  │  │  │  - cachedAt: number                                                    ││││
+│  │  │  └─────────────────────────────────────────────────────────────────────────┘│││
+│  │  └─────────────────────────────────────────────────────────────────────────────┘││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+│                                    │                                                  │
+│                                    ▼                                                  │
+│  ┌─────────────────────────────────────────────────────────────────────────────────┐│
+│  │                         SYNC ENGINE                                             ││
+│  │  ┌─────────────────────────────────────────────────────────────────────────────┐││
+│  │  │  1. Check connection status                                                │││
+│  │  │  2. If online: process pending queue                                       │││
+│  │  │  3. Retry failed operations with exponential backoff                       │││
+│  │  │  4. Update barcode cache from server                                      │││
+│  │  │  5. Update voice cache from server                                        │││
+│  │  │  6. Update status indicators                                               │││
+│  │  └─────────────────────────────────────────────────────────────────────────────┘││
+│  └─────────────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 12.2 Offline Support Matrix
+
+| Feature | Online | Offline (with sync) | Notes |
+|---------|--------|---------------------|-------|
+| View Products | ✅ | ✅ (cached) | Read from cache |
+| Barcode Lookup | ✅ | ✅ (cached) | Local barcode cache |
+| Voice Search | ✅ | ✅ (cached) | Local voice cache |
+| Add to Cart | ✅ | ✅ | Client-side only |
+| Submit Sale | ✅ | ✅ (queued) | Synced when online |
+| Log Restock | ✅ | ✅ (queued) | Synced when online |
+| Add Product | ✅ | ✅ (queued) | Synced when online |
+| Budget Builder | ✅ | ❌ | Needs latest stock |
+| Purchase Orders | ✅ | ❌ | Needs server |
+| Staff Management | ✅ | ❌ | Needs server |
+| Admin Dashboard | ✅ | ❌ | Needs latest data |
+| Reports | ✅ | ❌ | Needs server |
+| Barcode Assignment | ✅ | ✅ (queued) | Synced when online |
+| Voice Training | ✅ | ✅ (queued) | Synced when online |
+
+### 12.3 Sync Operations
+
+| Operation | Sync Method | Conflict Resolution |
+|-----------|-------------|-------------------|
+| Sales | Sequential | Last write wins |
+| Restocks | Sequential | Last write wins |
+| Products | Sequential | Last write wins |
+| Adjustments | Sequential | Last write wins |
+| Barcode Assignments | Sequential | Last write wins |
+| Voice Queries | Sequential | Append-only |
+| Staff Updates | Sequential | Last write wins |
+
+---
+
+## 13. DEPLOYMENT GUIDE
+
+### 13.1 Prerequisites
+- Google Workspace account (or Gmail)
+- Google Drive access
+- Basic understanding of Google Apps Script
+- USB Barcode Scanner (HID keyboard emulation) - optional
+- Phone/Tablet with camera - optional for camera scanning
+- Browser with Web Speech API support - optional for voice search
+
+### 13.2 Deployment Steps
+
+1. **Create Google Sheet**
+   - Open drive.google.com
+   - Create new Google Sheet
+   - Name it "TradeFlow Inventory"
+
+2. **Open Apps Script Editor**
+   - Extensions → Apps Script
+   - Name the project "TradeFlow Pro"
+
+3. **Add Code Files**
+   - Create `code.gs` (paste backend code)
+   - Create `Index.html` (paste frontend code)
+
+4. **Deploy Web App**
+   - Deploy → New Deployment
+   - Select "Web app"
+   - Set access to "Anyone with link" or "Anyone"
+   - Deploy
+   - Copy the web app URL
+
+5. **First Run Setup**
+   - Open web app URL
+   - Complete setup wizard:
+     - Enter Business Name
+     - Select Business Type
+     - Enter Owner/Manager details
+     - Enter Province, District, Physical Address
+     - Configure input methods (HID, Camera, Manual, Voice)
+     - Click "Setup Business"
+
+6. **Configure Input Methods**
+   - HID Scanner: Connect USB/Bluetooth scanner
+   - Camera Scanner: Grant camera permissions when prompted
+   - Voice Search: Grant microphone permissions when prompted
+   - Manual Entry: Available by default
+
+7. **Create Staff**
+   - Admin Dashboard → Staff Analytics
+   - Onboard staff members
+   - Set staff on duty
+
+8. **Start Using**
+   - Create products with barcodes
+   - Set Min/Max stock
+   - Begin sales and inventory management
+
+### 13.3 Scanner Setup
+
+| Step | Action | Description |
+|------|--------|-------------|
+| 1 | Connect Scanner | USB or Bluetooth connection |
+| 2 | Test Input | Open Notepad and scan a barcode |
+| 3 | Configure Settings | Set prefix/suffix if needed |
+| 4 | Open TradeFlow | Navigate to web app |
+| 5 | Scan Product | Focus on barcode input field |
+| 6 | Verify Action | Product should be found and actioned |
+
+### 13.4 Voice Setup
+
+| Step | Action | Description |
+|------|--------|-------------|
+| 1 | Grant Permission | Allow microphone access |
+| 2 | Test Speech | Click voice button and say a product name |
+| 3 | Verify Results | Products should appear in search results |
+| 4 | Train System | Use consistently for better recognition |
+
+### 13.5 Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Scanner not working | Check USB connection, test in Notepad |
+| Barcode not found | Verify barcode is assigned to product |
+| Camera not working | Check camera permissions, try different browser |
+| Voice not working | Check microphone permissions, try Chrome |
+| Setup wizard fails | Check all required fields are filled |
+| Sheets not creating | Run setup again, check permissions |
+| Login not working | Check SafeConfig sheet, set password |
+| Products not showing | Check ProductMaster sheet, run ID assignment |
+| Stock not updating | Check RestockProductLog and SalesLog |
+| FIFO not tracking | Check BatchCosts sheet exists |
+| Offline not working | Enable offline in setup panel |
+| Duplicate barcode | Barcode must be unique per product |
+
+---
+
+## 14. VOICE INPUT SYSTEM
+
+### 14.1 Voice Search Implementation
+
+The voice input system uses the Web Speech API for hands-free product search.
+
+#### 14.1.1 Voice Button UI
+```html
+<button class="btn-voice" id="voiceBtn" title="Voice Search">
+    <svg width="24" height="24" viewBox="0 0 24 24">
+        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+    </svg>
+    <span class="voice-status">Say product</span>
+</button>
+```
+
+#### 14.1.2 Voice Recognition
+```javascript
+function initVoiceSearch() {
+    var voiceBtn = document.getElementById('voiceBtn');
+    var searchInput = document.getElementById('searchInput');
+    var isListening = false;
+    var recognition = null;
+    
+    // Check browser support
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        voiceBtn.style.display = 'none';
+        return;
+    }
+    
+    // Create recognition instance
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-ZM';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 3;
+    
+    recognition.onresult = function(event) {
+        var results = event.results;
+        var transcript = '';
+        var confidence = 0;
+        
+        for (var i = 0; i < results.length; i++) {
+            if (results[i].isFinal) {
+                transcript = results[i][0].transcript;
+                confidence = results[i][0].confidence;
+                break;
+            }
+        }
+        
+        if (transcript) {
+            searchInput.value = transcript;
+            performVoiceSearch(transcript);
+            stopListening();
+        }
+    };
+    
+    recognition.onerror = function(event) {
+        console.log('Voice recognition error:', event.error);
+        stopListening();
+        
+        if (event.error === 'not-allowed') {
+            showToast('Microphone access denied');
+        } else if (event.error === 'no-speech') {
+            showToast('No speech detected, try again');
+        }
+    };
+    
+    recognition.onend = function() {
+        stopListening();
+    };
+    
+    function startListening() {
+        if (isListening) return;
+        isListening = true;
+        voiceBtn.classList.add('listening');
+        voiceBtn.querySelector('.voice-status').textContent = 'Listening...';
+        searchInput.placeholder = '🎤 Listening...';
+        recognition.start();
+    }
+    
+    function stopListening() {
+        if (!isListening) return;
+        isListening = false;
+        voiceBtn.classList.remove('listening');
+        voiceBtn.querySelector('.voice-status').textContent = 'Say product';
+        searchInput.placeholder = 'Search products or type barcode...';
+        try { recognition.stop(); } catch(e) {}
+    }
+    
+    voiceBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (isListening) {
+            stopListening();
+        } else {
+            startListening();
+        }
+    });
+    
+    // Stop listening if user types
+    searchInput.addEventListener('focus', function() {
+        if (isListening) stopListening();
+    });
+}
+
+function performVoiceSearch(query) {
+    var context = getCurrentContext();
+    
+    // Show loading state
+    showToast('Searching: "' + query + '"');
+    
+    runServer('voiceSearch', {
+        query: query,
+        context: context
+    }, function(results) {
+        if (!results || !results.length) {
+            showToast('No products found for "' + query + '"');
+            return;
+        }
+        
+        // Display results
+        displayVoiceResults(results);
+        
+        // Log voice query
+        logVoiceQuery(query, results[0], context);
+    });
+}
+```
+
+#### 14.1.3 Voice Results Display
+```html
+<div id="voiceResults" class="voice-results">
+    <div class="voice-results-header">
+        <span class="voice-query">"Sugar 2kg"</span>
+        <button class="voice-close" onclick="closeVoiceResults()">✕</button>
+    </div>
+    <div class="voice-results-list">
+        <!-- Results rendered by JavaScript -->
+    </div>
+</div>
+```
+
+### 14.2 Voice Training & Optimization
+
+```javascript
+function optimizeVoiceSearch() {
+    // 1. Build product name index
+    var products = getAllProducts();
+    var nameIndex = {};
+    var wordsIndex = {};
+    
+    products.forEach(function(product) {
+        var name = product.productName.toLowerCase();
+        var words = name.split(' ');
+        nameIndex[name] = product;
+        
+        words.forEach(function(word) {
+            if (!wordsIndex[word]) wordsIndex[word] = [];
+            wordsIndex[word].push(product);
+        });
+    });
+    
+    // 2. Cache for quick lookups
+    sessionStorage.setItem('voiceNameIndex', JSON.stringify(nameIndex));
+    sessionStorage.setItem('voiceWordsIndex', JSON.stringify(wordsIndex));
+    
+    // 3. Pre-load common phrases
+    var commonPhrases = [
+        'i want', 'need', 'looking for', 'can i get',
+        'do you have', 'price of', 'cost of', 'how much'
+    ];
+    sessionStorage.setItem('voiceCommonPhrases', JSON.stringify(commonPhrases));
+}
+
+function smartVoiceSearch(query) {
+    // 1. Clean query
+    query = query.toLowerCase().trim();
+    
+    // 2. Remove common phrases
+    var commonPhrases = JSON.parse(sessionStorage.getItem('voiceCommonPhrases') || '[]');
+    commonPhrases.forEach(function(phrase) {
+        query = query.replace(phrase, '');
+    });
+    
+    query = query.trim();
+    
+    // 3. Check exact match
+    var nameIndex = JSON.parse(sessionStorage.getItem('voiceNameIndex') || '{}');
+    if (nameIndex[query]) {
+        return [nameIndex[query]];
+    }
+    
+    // 4. Check word index
+    var wordsIndex = JSON.parse(sessionStorage.getItem('voiceWordsIndex') || '{}');
+    var words = query.split(' ');
+    var matches = {};
+    
+    words.forEach(function(word) {
+        if (wordsIndex[word]) {
+            wordsIndex[word].forEach(function(product) {
+                var id = product.productId;
+                if (!matches[id]) {
+                    matches[id] = { product: product, score: 0 };
+                }
+                matches[id].score += 10;
+            });
+        }
+    });
+    
+    // 5. Score and sort
+    var results = Object.values(matches);
+    results.sort(function(a, b) { return b.score - a.score; });
+    
+    return results.map(function(match) { return match.product; });
+}
+```
+
+---
+
+## 15. APPENDIX
+
+### 15.1 Default Categories (by Business Type)
+
+| Business Type | Category Prefix | Count |
+|---------------|-----------------|-------|
+| Retail Supermarket | CAT001-CAT018 | 18 |
+| Hardware & Building | CAT101-CAT118 | 18 |
+| Pharmacy & Health | CAT201-CAT218 | 18 |
+| Clothing & Fashion | CAT301-CAT318 | 18 |
+| Electronics & Appliances | CAT401-CAT418 | 18 |
+| Furniture Store | CAT501-CAT518 | 18 |
+| Automotive Parts | CAT601-CAT618 | 18 |
+| Restaurant & Food | CAT701-CAT718 | 18 |
+| Cosmetics & Beauty | CAT801-CAT818 | 18 |
+| Agricultural Supplies | CAT901-CAT918 | 18 |
+| Stationery & Office | CAT001-CAT018 | 18 |
+| Cellular & Airtime | CAT101-CAT118 | 18 |
+| Construction & Building | CAT201-CAT218 | 18 |
+| Pet Supplies Store | CAT301-CAT318 | 18 |
+| Bookstore & Learning | CAT401-CAT418 | 18 |
+| General Retail | CAT001-CAT018 | 18 |
+
+### 15.2 Key Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| EP_CACHE_TTL_BARCODE_SEC | 3600 | Barcode lookup cache TTL |
+| EP_CACHE_TTL_VOICE_SEC | 300 | Voice search cache TTL |
+| EP_CACHE_TTL_STOCK_SEC | 90 | Stock map cache TTL |
+| EP_CACHE_TTL_CATEGORIES_SEC | 600 | Categories cache TTL |
+| EP_CACHE_TTL_STAFF_SEC | 300 | Staff list cache TTL |
+| EP_CACHE_TTL_DASHBOARD_SEC | 45 | Dashboard cache TTL |
+| EP_TABLE_PAGE_SIZE | 10 | Default pagination size |
+| EP_OFFLINE_DB_VERSION | 2 | Offline database version |
+| EP_PORTAL_PASSWORD_NOT_SET | "NOT_SET" | Empty password sentinel |
+| EP_BARCODE_MIN_LENGTH | 3 | Minimum barcode length |
+| EP_BARCODE_MAX_LENGTH | 50 | Maximum barcode length |
+| EP_VOICE_MIN_CONFIDENCE | 0.5 | Minimum voice confidence |
+
+### 15.3 Status Codes
+
+| Status | Meaning |
+|--------|---------|
+| Paid | Sale completed and paid |
+| Pending | Cart hold, not yet paid |
+| Loan | Credit sale, no stock deduction |
+| PartialPaid | Partially paid, balance due |
+| Cancelled | Voided sale |
+| WriteOff | Sale written off as loss |
+
+### 15.4 Adjustment Types
+
+| Type | Description |
+|------|-------------|
+| Damage | Products damaged in store |
+| Theft | Missing/stolen items |
+| Return | Return to supplier |
+| Write-off | Expired/unsellable |
+| Breakage | Broken items |
+| Correction | Fix stock count errors |
+| Sample | Free samples/giveaways |
+| Transfer | Move to another location |
+
+### 15.5 Zambia Provinces & Districts
+
+#### Provinces
+1. Central Province
+2. Copperbelt Province
+3. Eastern Province
+4. Luapula Province
+5. Lusaka Province
+6. Muchinga Province
+7. Northern Province
+8. North-Western Province
+9. Southern Province
+10. Western Province
+
+#### Major Districts
+- Lusaka District (Lusaka)
+- Kitwe District (Copperbelt)
+- Ndola District (Copperbelt)
+- Kabwe District (Central)
+- Livingstone District (Southern)
+- Chipata District (Eastern)
+- Kasama District (Northern)
+- Solwezi District (North-Western)
+- Mongu District (Western)
+- Mansa District (Luapula)
+
+### 15.6 Barcode Formats
+
+| Format | Length | Example | Use Case |
+|--------|--------|---------|----------|
+| EAN-13 | 13 digits | 8901234567890 | Retail products |
+| UPC-A | 12 digits | 012345678905 | North American products |
+| EAN-8 | 8 digits | 12345670 | Small items |
+| Code 128 | Variable | ABC123456 | Inventory tracking |
+| Code 39 | Variable | *ABC123* | Warehouse management |
+| QR Code | Variable | https://... | Product info links |
+| Custom | Variable | PRD001 | Internal product IDs |
+
+### 15.7 Voice Commands
+
+| Command | Description | Context |
+|---------|-------------|---------|
+| "Product name" | Search for product | Any |
+| "Add [product]" | Add product to cart | Sales |
+| "Restock [product]" | Restock product | Restock |
+| "Adjust [product]" | Adjust product | Adjustment |
+| "Budget [product]" | Add to budget | Budget |
+| "Clear cart" | Clear all items | Sales |
+| "Checkout" | Proceed to checkout | Sales |
+| "Cancel" | Cancel current action | Any |
+
+---
+
+## 16. CONCLUSION
+
+TradeFlow Pro is a complete, production-ready inventory management system that combines:
+
+✅ **Sales Management** - Cart-based checkout with multiple payment types
+✅ **Barcode Scanning** - HID scanner (default) + Camera (on-demand) + Manual entry
+✅ **Voice Search** - Hands-free product search with speech recognition
+✅ **Inventory Control** - Real-time stock tracking with FIFO batch costs
+✅ **Procurement** - Budget builder with auto-generated purchase orders
+✅ **Stock Adjustments** - Full audit trail for all stock movements
+✅ **Financial Reporting** - Daily/Weekly/Monthly ledgers
+✅ **Staff Management** - Role-based access control
+✅ **Multi-Business Support** - 15+ business types with pre-configured categories
+✅ **Security** - SHA-256 password hashing with portal authentication
+✅ **Performance** - Multi-level caching for fast responses
+✅ **Offline** - Works without internet with sync capability
+✅ **Mobile-First** - Optimized for phones and tablets
+
+### Input Methods Comparison
+
+| Feature | HID Scanner | Camera Scanner | Manual Entry | Voice Search |
+|---------|-------------|----------------|--------------|--------------|
+| Speed | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ |
+| Accuracy | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+| Hardware | Scanner | Phone Camera | None | Microphone |
+| Cost | Extra | Free | Free | Free |
+| Learning Curve | Low | Low | Low | Medium |
+| Continuous Use | Excellent | Poor | Poor | Good |
+| Best For | Professional checkout | Occasional scans | Corrections | Hands-free |
+
+The system is built on Google Sheets (free, accessible) with a modern, responsive interface that can be used by anyone with a Google account. The three input methods (HID scanner, camera scanner, voice search) all feed into the same business logic, providing a seamless experience regardless of how the user chooses to input products.
+
+---
+
+*Documentation Version 3.0*  
+*Last Updated: July 2026*  
+*Built by Nthemba Digital Services (NDS)*}
+
+App: Tradeflow
+Tagline: Digital backbone for Growing Comunities
+Company: NTheemba Digital Services

@@ -1,0 +1,248 @@
+TRADEFLOW LOCAL WORKFLOW SPEC
+POS-FIRST INVENTORY OS
+
+Purpose
+- TradeFlow runs as a local-first POS and inventory operating system.
+- The workflow keeps the business outcome of the DeepSeek model, but the entry points are faster and more practical for daily use.
+- The main trigger is sales and low-stock alerts, not manual inspection.
+
+Core Rule
+- Stock moves only from confirmed events.
+- Sale confirmed: stock goes down.
+- Receipt confirmed: stock goes up.
+- Adjustment confirmed: stock changes only with an audit trail.
+
+1) Product Setup Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Product is added or edited                                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Enter product details          │
+                    │  - Product name                 │
+                    │  - Barcode                      │
+                    │  - Category                     │
+                    │  - Unit                         │
+                    │  - Cost price                   │
+                    │  - Selling price                │
+                    │  - Min stock                    │
+                    │  - Max stock                    │
+                    │  - Starting stock               │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Save product master            │
+                    │  and store cost history         │
+                    └─────────────────────────────────┘
+
+Notes
+- Barcode is first-class and can be entered manually, scanned, or generated.
+- Cost price becomes the default reference for budget building.
+
+2) Sales / POS Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Staff sells from the POS                                                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Find product fast               │
+                    │  - Dropdown                      │
+                    │  - Barcode scan                  │
+                    │  - Voice entry                   │
+                    │  - Search filter                 │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Enter qty, discount, staff ID  │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Confirm sale                    │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  System reduces stock            │
+                    │  and writes sale log             │
+                    └─────────────────────────────────┘
+
+Notes
+- The sale screen is the fastest path into the system.
+- No inspection step is needed for ordinary selling.
+
+3) Low-Stock Watch Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ System detects stock pressure                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Compare stock to min stock      │
+                    │  or reorder level                │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Show low-stock alerts           │
+                    │  in dashboard / More menu        │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  User adds item to budget list   │
+                    └─────────────────────────────────┘
+
+Notes
+- In the local model, low-stock watch replaces walk-around inspection.
+- It is the operational trigger for restocking.
+
+4) Budget Building Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Budget list is built from low-stock items                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  System fills budget line        │
+                    │  using previous cost price       │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  User reviews and adjusts        │
+                    │  - quantity                     │
+                    │  - unit cost                    │
+                    │  - pack price if needed         │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Budget total updates live       │
+                    └─────────────────────────────────┘
+
+Notes
+- Previous cost price is the default because it is the fastest and most realistic planning value.
+- Users can override the cost before purchase.
+
+5) Purchase / Order Placement Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Budget becomes a purchase order                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  User confirms order quantities  │
+                    │  and planned costs               │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  System creates pending order    │
+                    │  with order number and status    │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Budget is cleared               │
+                    │  for the next cycle              │
+                    └─────────────────────────────────┘
+
+Notes
+- The order keeps both expected quantity and planned cost.
+- Purchase-time edits are allowed before final placement.
+
+6) Staff Receiving Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Staff receives stock                                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Staff opens pending receipts    │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Enter per product:              │
+                    │  - received quantity             │
+                    │  - damaged quantity              │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Confirm receipt                 │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  System adds received stock      │
+                    │  and records damaged stock       │
+                    └─────────────────────────────────┘
+
+Notes
+- Confirmed receipt is what updates stock.
+- No manual backdating or hidden stock change should happen here.
+
+7) Stock Update Rules
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Every movement updates the inventory state                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                ┌─────────────────────┼─────────────────────┐
+                ▼                     ▼                     ▼
+        Sale confirmed         Receipt confirmed       Adjustment confirmed
+                │                     │                     │
+                ▼                     ▼                     ▼
+        Stock decreases         Stock increases        Stock changes with
+                                                      reason and audit log
+
+8) Search-First Entry Flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Product entry is optimized for speed                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │  Search by dropdown              │
+                    │  Search by barcode               │
+                    │  Search by voice                 │
+                    │  Search by typed filter          │
+                    └─────────────────────────────────┘
+
+Notes
+- Dropdown is the safe fallback.
+- Barcode is the fastest path.
+- Voice is the hands-free fallback.
+
+9) Role Responsibilities
+Staff
+- Sell products.
+- Receive and confirm deliveries.
+- Check low-stock alerts.
+
+Admin
+- Add and edit products.
+- Build budgets.
+- Adjust purchase quantities and costs.
+- Review stock and reports.
+
+10) Local-First Principle
+- Do not force inspection as the main flow.
+- Use low-stock alerts as the restock trigger.
+- Use previous cost price as the budget starting point.
+- Allow purchase-time edits before placing the order.
+- Confirm receipt to update stock automatically.
+
+End State
+- TradeFlow behaves like a local inventory OS:
+- sell fast
+- detect low stock
+- plan restock
+- place purchase
+- receive stock
+- update inventory automatically

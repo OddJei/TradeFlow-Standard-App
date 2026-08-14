@@ -9,3 +9,7 @@ Clean source package for the standard/reference TradeFlow Apps Script app.
 Preserve the reference app's baseline workflow rules: supplier deliveries, owner restock, shop inspection, inventory valuation, and estimated profit. Do not introduce mandatory POS or automatic sales-based stock deduction without explicit product approval.
 
 See `PACKAGING_NOTES.md` for publish exclusions.
+
+## Documentation
+
+Product blueprints and standard Entrypack/scanner implementation notes are in `docs/`.
