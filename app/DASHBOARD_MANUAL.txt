@@ -1,0 +1,561 @@
+TRADEFLOW DASHBOARD MANUAL
+==========================
+
+Purpose
+-------
+This manual explains what each dashboard card, number, table, column, and row means in the TradeFlow app.
+
+Currency
+--------
+All money values are shown in ZMW.
+
+Important Business Note
+-----------------------
+Revenue may be recorded manually or through the POS workflow when enabled for this app.
+
+Profit, COGS, and realized margin become more accurate when stock adjustments, physical counts, receipts, POS sales, and batch records are used consistently.
+
+
+1. MAIN DASHBOARD
+=================
+
+The main dashboard gives the owner or admin a quick snapshot of sales visibility, expenses, inventory value, expected profit, stock risk, and recent movement.
+
+
+1.1 Today's Revenue
+-------------------
+Meaning:
+The total revenue recorded for today.
+
+Math:
+Sum all Revenue rows where Date equals today's date.
+
+Formula:
+Today's Revenue = Sum(revenue.amount where revenue.date = today)
+
+Example:
+If today's revenue entries are:
+- ZMW 400
+- ZMW 150
+
+Today's Revenue = ZMW 550
+
+
+1.2 Today's Expenses
+--------------------
+Meaning:
+The total expenses recorded for today.
+
+Math:
+Sum all Expense rows where Date equals today's date.
+
+Formula:
+Today's Expenses = Sum(expense.amount where expense.date = today)
+
+
+1.3 Month Revenue
+-----------------
+Meaning:
+The total revenue recorded in the current month.
+
+Math:
+Sum all Revenue rows where the date falls inside the current month.
+
+Formula:
+Month Revenue = Sum(revenue.amount where revenue month = current month)
+
+
+1.4 Month Cash Out
+------------------
+Meaning:
+The total cash expenses recorded in the current month, including restock purchases.
+
+Math:
+Sum all Expense rows where the date falls inside the current month.
+
+Formula:
+Month Cash Out = Sum(expense.amount where expense month = current month)
+
+
+1.5 Pending Receipts
+--------------------
+Meaning:
+How many restock orders are still waiting to be received or are only partly received.
+
+Math:
+Count all restock orders where status is:
+- pending-receipt
+- partially-received
+
+Formula:
+Pending Receipts = Count(restockOrders where status = pending-receipt or partially-received)
+
+Use:
+This tells the owner what stock was purchased but has not yet fully entered inventory.
+
+
+1.6 Operating Expense Ratio
+---------------------------
+Meaning:
+How much of the month's revenue has been consumed by operating expenses.
+
+Important:
+Inventory/restock purchases are excluded here because they are inventory cash-out. They later affect profit through COGS when stock is reduced. This avoids counting the same inventory cost twice.
+
+Math:
+Month Operating Expenses divided by Month Revenue, then multiplied by 100.
+
+Formula:
+Operating Expense Ratio = (Month Operating Expenses / Month Revenue) * 100
+
+If Month Revenue is zero:
+The dashboard shows "No revenue".
+
+Example:
+Month Revenue = ZMW 10,000
+Month Operating Expenses = ZMW 4,000
+
+Operating Expense Ratio = 40.0%
+
+Use:
+A high expense ratio means expenses are taking a large part of the revenue.
+
+
+1.7 Inventory Value
+-------------------
+Meaning:
+The current cost value of stock still remaining in the shop.
+
+Math:
+For every batch:
+Qty Remaining multiplied by Unit Cost.
+
+Then all batch values are added together.
+
+Formula:
+Inventory Value = Sum(batch.qtyRemaining * batch.unitCost)
+
+
+1.8 Expected Profit Remaining
+-----------------------------
+Meaning:
+The profit expected from stock that is still remaining.
+
+Formula:
+Expected Profit Remaining = Sum((batch.sellingPriceSnapshot - batch.unitCost) * batch.qtyRemaining)
+
+
+1.9 Realized Profit
+-------------------
+Meaning:
+Profit already realized from stock reductions, physical-count changes, or POS sales where stock reduction is recorded.
+
+Formula:
+Realized Profit = Sum(batch.realizedMargin)
+
+
+1.10 Dead Stock 60d
+-------------------
+Meaning:
+Products that still have stock but have not moved for 60 days.
+
+Formula:
+Dead Stock 60d = Count(products with stock > 0 and no movement in last 60 days)
+
+
+1.11 Cash Flow
+--------------
+Meaning:
+Cash coming in minus cash going out.
+
+Formula:
+Cash Flow = Total Revenue - Total Expenses
+
+Important:
+Cash Flow does not subtract COGS. It is cash-in minus cash-out.
+
+
+1.12 Average Margin %
+---------------------
+Meaning:
+The average expected margin percentage across batch history.
+
+Formula:
+Average Margin % = (Expected Batch Margin / Expected Batch Revenue) * 100
+
+
+1.13 Month-over-Month Snapshot
+------------------------------
+Meaning:
+Compares the current month against the previous month.
+
+Cards shown:
+- Revenue
+- Net Profit
+- Operating Expenses
+- Cash Flow
+
+Gross Profit:
+Revenue - COGS
+
+Net Profit:
+Revenue - COGS - Operating Expenses
+
+Cash Flow:
+Revenue - Expenses
+
+Percent Change:
+((Current Month Value - Previous Month Value) / Previous Month Value) * 100
+
+
+1.14 Inventory Snapshot
+-----------------------
+Meaning:
+Shows top products by current stock quantity.
+
+Progress Bar:
+(Current Stock / Max Stock) * 100
+
+
+1.15 Detail Drilldown
+---------------------
+Top Expense Categories:
+Groups expenses by category and adds the amounts.
+
+Recent Activity:
+Shows latest activity from:
+- Revenue entries
+- Expense entries
+- POS sales
+- Stock adjustments
+- Notifications
+
+
+2. PRODUCTS TAB
+===============
+
+The Products tab shows all products, current stock, prices, cost history, and product-level stock status.
+
+Product Stock:
+Sum all batch quantities remaining for that product.
+
+Product Inventory Value:
+Sum(batch.qtyRemaining * batch.unitCost)
+
+Total Remaining Margin:
+Sum(batch.remainingMargin)
+
+Restock Frequency:
+Count(restock order items for product) + Count(product batches)
+
+
+3. POS TAB
+==========
+
+The POS tab records sales when the POS workflow is enabled in this standard app.
+
+POS Sale:
+Creates a sale/revenue record and may create stock movement records depending on the app's configured POS flow.
+
+Amount:
+Sum of sold item quantities multiplied by their selling prices.
+
+Trust note:
+Amounts should preserve real decimal values. For example, ZMW 2.5 should display as 2.5, not rounded to 3.
+
+
+4. QUICK RESTOCK TAB
+====================
+
+The Quick Restock tab records stock received directly into inventory without first building a budget order.
+
+When stock is received:
+- A new batch is added to the product.
+- Inventory value increases.
+- Expected profit remaining updates.
+- A notification is created.
+
+Batch math:
+Total Cost = Qty Received * Unit Cost
+Expected Revenue = Qty Received * Selling Price Snapshot
+Expected Margin = Expected Revenue - Total Cost
+
+
+5. REVENUE TAB
+==============
+
+The Revenue tab records daily revenue.
+
+Revenue Dashboard Cards:
+- Filtered Revenue = Sum visible revenue rows after filters
+- This Month = Sum revenue rows in the current month
+- Average Entry = Filtered Revenue / Number of visible revenue rows
+- Largest Entry = Highest revenue amount among visible rows
+
+Revenue Filters:
+- From Date
+- To Date
+- Category
+- Search
+
+Revenue Table Columns:
+- Date
+- Amount
+- Notes
+
+
+6. EXPENSES TAB
+===============
+
+The Expenses tab records spending by category and named expense.
+
+Expenses may be:
+- Manually entered
+- Auto-created from budget purchases
+- Auto-created from recurring expenses
+
+Expenses Dashboard Cards:
+- Filtered Expenses = Sum visible expense rows after filters
+- This Month = Sum expense rows in the current month
+- Average Entry = Filtered Expenses / Number of visible expense rows
+- Top Category = Expense category with the highest total amount
+
+Expense Filters:
+- From Date
+- To Date
+- Category
+- Search
+
+Expense Table Columns:
+- Date
+- Category
+- Expense
+- Amount
+- Notes
+
+
+7. SHOP INSPECTION TAB
+======================
+
+The Shop Inspection tab compares physical counts against target stock levels and helps build restock budgets.
+
+Current Stock:
+Sum of remaining quantities across all batches for the product.
+
+Fill %:
+(Current Stock / Max Stock) * 100
+
+Restock Quantity:
+Max Stock - Physical Count
+
+If the result is below zero, it becomes zero.
+
+Apply Physical Count:
+If physical count is higher than app stock, the app adds an overage batch and creates a stock adjustment.
+
+If physical count is lower than app stock, the app reduces stock through FIFO batch reduction and creates a stock adjustment.
+
+FIFO means the oldest stock batch is reduced first.
+
+
+8. BUDGET BUILDER TAB
+=====================
+
+The Budget Builder prepares a restock plan before purchase.
+
+Budget Row:
+One row represents one product planned for restocking.
+
+Budget Total:
+Sum(row.restockQty * row.costPrice)
+
+Checkout / Purchase:
+When checkout is confirmed:
+- A restock order is created.
+- The order becomes a pending receipt.
+- An expense is created for the purchase.
+- The budget is cleared.
+
+
+9. PENDING RECEIPTS TAB
+=======================
+
+The Pending Receipts tab confirms stock that was purchased but not yet received.
+
+Usable Qty:
+Received Qty - Damaged Qty
+
+Only usable quantity is added to stock.
+
+Damaged quantity does not increase stock.
+
+Damaged stock creates a stock adjustment loss.
+
+Damaged Cost:
+Damaged Qty * Unit Cost
+
+
+10. ORDER HISTORY TAB
+=====================
+
+The Order History tab shows restock orders already placed and their receipt progress.
+
+Expected:
+Total quantity ordered.
+
+Received:
+Total quantity confirmed as received.
+
+Damaged:
+Total quantity marked damaged.
+
+Progress %:
+(Received Qty / Expected Qty) * 100
+
+
+11. STOCK ADJUSTMENTS TAB
+=========================
+
+The Stock Adjustments tab records stock reductions and losses.
+
+Examples:
+- Damaged stock
+- Physical count shortage
+- Inspection assumed sale
+- Manual reduction
+- POS stock movement, when used by the POS workflow
+
+COGS:
+Cost of goods removed from stock.
+
+Formula:
+COGS = Qty Reduced * Unit Cost of affected batch
+
+Estimated Revenue:
+Qty Reduced * Selling Price Snapshot
+
+Estimated Margin:
+Estimated Revenue - COGS
+
+
+12. INVENTORY LEDGER TAB
+========================
+
+The Inventory Ledger shows every restock batch and its profit lifecycle.
+
+Remaining Profit:
+Sum(batch.remainingMargin)
+
+Realized Profit:
+Sum(batch.realizedMargin)
+
+Inventory Value:
+Sum(batch.qtyRemaining * batch.unitCost)
+
+Ledger Table Columns:
+- Restock Date
+- Product
+- Batch ID
+- Qty Received
+- Qty Remaining
+- Unit Cost
+- Selling Snapshot
+- Total Cost
+- Expected Revenue
+- Expected Margin
+- Margin Realized
+- Remaining Margin
+- Status
+
+
+13. REPORTS TAB
+===============
+
+The Reports tab gives a deeper report view with date filters, KPIs, charts, and tables.
+
+The date filter affects:
+- Revenue rows
+- Expense rows
+- COGS rows
+- Batch rows
+
+Supported exports:
+- CSV
+- PDF
+- Word DOC
+- Word DOCX
+- Google Sheets link
+
+Report KPI Cards:
+- Total Revenue = Sum revenue rows in selected date range
+- Gross Margin = ((Revenue - COGS) / Revenue) * 100
+- Net Profit = Revenue - COGS - Operating Expenses
+- Operating Expenses = Sum non-inventory expenses in selected date range
+- Inventory Turnover = COGS / Inventory Value
+- Cash Flow = Revenue - Expenses
+- Inventory Value = Current remaining stock value
+- Expected Profit Remaining = Expected profit still inside remaining stock
+- Realized Profit = Profit already realized from reduced stock
+- Open Batch Value = Inventory value for all batches not completed
+- Completed Batch Profit = Realized profit from completed batches
+- Average Margin % = Expected batch margin divided by expected batch revenue
+
+Profit Drilldown:
+Shows month-by-month values:
+- Revenue
+- Operating Expenses
+- Cash Out
+- Cash Flow
+- Net Profit
+
+Profit by Batch Table:
+One row represents one batch and shows expected, realized, and remaining margin.
+
+Profit by Product Table:
+One row represents one product and shows stock, inventory value, realized margin, and remaining margin.
+
+Revenue Table:
+One row is one revenue record inside the selected date range.
+
+Expenses Table:
+One row is one expense record inside the selected date range.
+
+COGS Table:
+One row is one stock adjustment cost record inside the selected date range.
+
+
+14. KEY TERMS
+=============
+
+Batch:
+A group of stock received at one time with its own cost price and selling price snapshot.
+
+Unit Cost:
+The cost price per unit for a batch.
+
+Selling Snapshot:
+The selling price captured at the time of batch creation or updated for remaining open stock.
+
+COGS:
+Cost of goods sold or removed from stock.
+
+Realized Margin:
+Profit already counted from stock reductions.
+
+Remaining Margin:
+Expected profit still sitting in remaining stock.
+
+Inventory Value:
+The cost value of stock still remaining.
+
+Cash Flow:
+Revenue minus expenses.
+
+Net Profit:
+Revenue minus COGS minus operating expenses.
+
+Dead Stock:
+Stock that remains available but has not moved recently.
+
+Pending Receipt:
+A purchase order that has not yet been fully received into stock.

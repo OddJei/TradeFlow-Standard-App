@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>NDS Capture Runtime</title>
+  <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
+  <script src="https://browser.sentry-cdn.com/10.42.0/bundle.tracing.min.js" crossorigin="anonymous"></script>
+  <script>
+    window.TRADEFLOW_SENTRY_CONFIG = {};
+    (function() {
+      let cfg = window.TRADEFLOW_SENTRY_CONFIG || {};
+      const blockedKey = /(password|pin|token|secret|authorization|cookie|appstate|customer|row|payload)/i;
+      function scrub(value, depth) {
+        if (depth > 3) return '[DepthLimit]';
+        if (value == null || typeof value === 'number' || typeof value === 'boolean') return value;
+        if (typeof value === 'string') return value.length > 500 ? value.slice(0, 500) + '...' : value;
+        if (Array.isArray(value)) return value.slice(0, 10).map(item => scrub(item, depth + 1));
+        if (typeof value === 'object') {
+          const out = {};
+          Object.keys(value).slice(0, 30).forEach(key => {
+            out[key] = blockedKey.test(key) ? '[Filtered]' : scrub(value[key], depth + 1);
+          });
+          return out;
+        }
+        return String(value);
+      }
+      window.captureTradeFlowUiError = function(error, context) {
+        if (!window.Sentry || !cfg.dsn) return;
+        const normalized = error instanceof Error ? error : new Error(String(error && error.message ? error.message : error || 'Unknown UI error'));
+        Sentry.captureException(normalized, { tags: Object.assign({ origin: 'ui' }, (context && context.tags) || {}), extra: scrub(context || {}, 0) });
+      };
+      window.captureTradeFlowRpcError = function(error, moduleName, functionName) {
+        window.captureTradeFlowUiError(error, { tags: { origin: 'google.script.run', backend_reported: 'unknown', module: moduleName || 'rpc', function_name: functionName || 'unknown' } });
+      };
+      window.configureTradeFlowSentry = function(runtimeConfig) {
+        cfg = Object.assign({}, runtimeConfig || {});
+        window.TRADEFLOW_SENTRY_CONFIG = cfg;
+        if (!window.Sentry || !cfg.dsn || window.__tradeFlowSentryInitialized) return;
+        window.__tradeFlowSentryInitialized = true;
+        Sentry.init({
+          dsn: cfg.dsn,
+          environment: cfg.environment,
+          release: cfg.release,
+          sendDefaultPii: false,
+          integrations: Sentry.browserTracingIntegration ? [Sentry.browserTracingIntegration({ tracePropagationTargets: [] })] : [],
+          tracesSampleRate: 0.2,
+          beforeSend(event) {
+            if (event.extra) event.extra = scrub(event.extra, 0);
+            if (event.contexts) event.contexts = scrub(event.contexts, 0);
+            if (event.request) event.request = scrub(event.request, 0);
+            return event;
+          }
+        });
+        Sentry.setTags({ product: cfg.product, edition: cfg.edition, client_id: cfg.clientId, installation_id: cfg.installationId, environment: cfg.environment, release: cfg.release, app_surface: cfg.appSurface });
+        Sentry.setContext('tradeflow_installation', { product: cfg.product, edition: cfg.edition, client_id: cfg.clientId, installation_id: cfg.installationId, app_surface: cfg.appSurface });
+      };
+      window.configureTradeFlowSentry(cfg);
+      window.loadTradeFlowRuntimeConfig = function(appSurface, onLoaded) {
+        if (!(window.google && google.script && google.script.run)) return;
+        google.script.run
+          .withSuccessHandler(function(runtimeConfig) {
+            const sentry = Object.assign({}, (runtimeConfig && runtimeConfig.sentry) || {}, { appSurface: appSurface || 'capture-runtime' });
+            window.configureTradeFlowSentry(sentry);
+            if (typeof onLoaded === 'function') onLoaded(runtimeConfig || {});
+          })
+          .withFailureHandler(function() {})
+          .getPublicRuntimeConfig();
+      };
+      window.testTradeFlowSentryBrowser = function() { throw new Error('TradeFlow browser Sentry test ' + new Date().toISOString()); };
+    })();
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #f8fafc;
+      background: #071a33;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .shell { width: min(100%, 520px); display: grid; gap: 12px; }
+    .head { text-align: center; padding: 8px 0 4px; }
+    .head h1 { font-size: 1.35rem; line-height: 1.1; }
+    .head p { color: #94a3b8; font-size: .86rem; margin-top: 4px; }
+    .badge {
+      display: inline-flex;
+      margin-top: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(62, 193, 142, .16);
+      color: #86efac;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .scanner {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 18px;
+      background: #020617;
+      box-shadow: 0 18px 45px rgba(0,0,0,.24);
+    }
+    #scannerTarget, #scannerTarget video, #previewVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .frame {
+      position: absolute;
+      inset: 15%;
+      border: 2px solid rgba(62, 193, 142, .75);
+      border-radius: 14px;
+      pointer-events: none;
+      box-shadow: 0 0 36px rgba(62, 193, 142, .16);
+    }
+    .line {
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      top: 20%;
+      background: linear-gradient(90deg, transparent, #3ec18e, transparent);
+      animation: scan 1.8s ease-in-out infinite;
+    }
+    @keyframes scan { 0% { top: 18%; opacity: 0; } 45% { opacity: 1; } 100% { top: 82%; opacity: 0; } }
+    .panel {
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      background: rgba(255,255,255,.07);
+      padding: 12px;
+    }
+    .status { display: flex; align-items: center; gap: 10px; min-height: 48px; }
+    .dot { width: 9px; height: 9px; border-radius: 999px; background: #94a3b8; flex: none; }
+    .dot.ready { background: #3ec18e; animation: pulse 1s infinite; }
+    .dot.warn { background: #f59e0b; }
+    .dot.error { background: #ef4444; }
+    @keyframes pulse { 50% { opacity: .45; transform: scale(1.35); } }
+    #statusText { color: #e2e8f0; font-size: .9rem; }
+    .result { display: none; color: #86efac; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
+    .result.show { display: block; }
+    .manual { display: grid; gap: 8px; }
+    label { color: #94a3b8; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+    .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+    input {
+      min-height: 44px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 10px;
+      background: rgba(2, 6, 23, .82);
+      color: #f8fafc;
+      padding: 10px 12px;
+      font-size: 1rem;
+      outline: none;
+    }
+    input:focus { border-color: #3ec18e; box-shadow: 0 0 0 3px rgba(62,193,142,.15); }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    button {
+      min-height: 44px;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .primary { background: linear-gradient(135deg, #d9a441, #3ec18e); color: #071a33; }
+    .ghost { background: rgba(255,255,255,.08); color: #f8fafc; border: 1px solid rgba(255,255,255,.14); }
+    .send { background: #2563eb; color: white; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="head">
+      <h1>NDS Capture Runtime</h1>
+      <p id="subtitle">Reusable capture for NDS products</p>
+      <span class="badge" id="modeBadge">barcode</span>
+    </section>
+
+    <section class="scanner" id="scannerBox">
+      <div id="scannerTarget"></div>
+      <video id="previewVideo" autoplay muted playsinline webkit-playsinline class="hidden"></video>
+      <div class="frame"><div class="line"></div></div>
+    </section>
+
+    <section class="panel status">
+      <div class="dot warn" id="statusDot"></div>
+      <div id="statusText">Starting capture runtime...</div>
+    </section>
+
+    <section class="panel result" id="resultBox"></section>
+
+    <section class="panel manual">
+      <label for="manualValue">Manual entry</label>
+      <div class="row">
+        <input id="manualValue" type="text" autocomplete="off" placeholder="Type barcode..." />
+        <button class="send" onclick="sendManual()">Send</button>
+      </div>
+    </section>
+
+    <section class="actions">
+      <button class="primary" onclick="restartCapture()">Restart</button>
+      <button class="ghost" onclick="cancelCapture()">Cancel</button>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const PROTOCOL = 'NDS_CAPTURE_V1';
+      const params = new URLSearchParams(location.search);
+      const state = {
+        protocol: params.get('protocol') || PROTOCOL,
+        mode: params.get('mode') || 'barcode',
+        returnTarget: params.get('return') || 'default',
+        sessionId: params.get('session') || '',
+        token: params.get('token') || '',
+        apiUrl: params.get('api') || '',
+        parentOrigin: params.get('parentOrigin') || '*',
+        readySent: false,
+        configReceived: false,
+        closing: false,
+        lastValue: '',
+        lastValueAt: 0,
+        stream: null,
+        quaggaHandler: null,
+        productLookup: null,
+        dbPromise: null,
+      };
+
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+      const resultBox = document.getElementById('resultBox');
+      const modeBadge = document.getElementById('modeBadge');
+      const subtitle = document.getElementById('subtitle');
+      const previewVideo = document.getElementById('previewVideo');
+      const scannerTarget = document.getElementById('scannerTarget');
+
+      modeBadge.textContent = state.mode;
+      subtitle.textContent = state.returnTarget ? 'Return target: ' + state.returnTarget : 'Reusable capture for NDS products';
+
+      function setStatus(message, tone) {
+        statusText.textContent = message;
+        statusDot.className = 'dot ' + (tone || 'warn');
+      }
+
+      function postToParent(message) {
+        if (!window.opener) return false;
+        try {
+          window.opener.postMessage(Object.assign({
+            protocol: PROTOCOL,
+            sessionId: state.sessionId,
+            token: state.token,
+          }, message), state.parentOrigin || '*');
+          return true;
+        } catch (error) {
+          console.warn('Parent postMessage failed', error);
+          return false;
+        }
+      }
+
+      function announceReady() {
+        if (state.readySent) return;
+        state.readySent = true;
+        postToParent({ type: 'NDS_CAPTURE_READY', mode: state.mode, returnTarget: state.returnTarget });
+      }
+
+      window.addEventListener('message', function (event) {
+        const data = event.data || {};
+        if (data.protocol !== PROTOCOL || data.type !== 'NDS_CAPTURE_CONFIG') return;
+        if (data.sessionId !== state.sessionId || data.token !== state.token) return;
+        const config = data.config || {};
+        state.configReceived = true;
+        state.mode = config.mode || state.mode;
+        state.returnTarget = config.returnTarget || state.returnTarget;
+        state.apiUrl = config.apiUrl || state.apiUrl;
+        if (config.productLookup) {
+          cacheProductLookup(config.productLookup);
+        }
+        modeBadge.textContent = state.mode;
+      });
+
+      function openLookupDb() {
+        if (state.dbPromise) return state.dbPromise;
+        state.dbPromise = new Promise(function (resolve, reject) {
+          if (!window.indexedDB) {
+            reject(new Error('IndexedDB unavailable'));
+            return;
+          }
+          const request = indexedDB.open('NDS_CAPTURE_RUNTIME_DB', 1);
+          request.onupgradeneeded = function () {
+            const db = request.result;
+            if (!db.objectStoreNames.contains('products')) {
+              const store = db.createObjectStore('products', { keyPath: 'barcode' });
+              store.createIndex('cacheName', 'cacheName', { unique: false });
+            }
+            if (!db.objectStoreNames.contains('meta')) {
+              db.createObjectStore('meta', { keyPath: 'key' });
+            }
+          };
+          request.onsuccess = function () { resolve(request.result); };
+          request.onerror = function () { reject(request.error); };
+        });
+        return state.dbPromise;
+      }
+
+      async function cacheProductLookup(lookup) {
+        const clean = lookup && Array.isArray(lookup.products) ? lookup : null;
+        if (!clean) return;
+        state.productLookup = clean;
+        try {
+          const db = await openLookupDb();
+          await new Promise(function (resolve, reject) {
+            const tx = db.transaction(['products', 'meta'], 'readwrite');
+            const products = tx.objectStore('products');
+            const meta = tx.objectStore('meta');
+            products.index('cacheName').openCursor(IDBKeyRange.only(clean.cacheName || 'default')).onsuccess = function (event) {
+              const cursor = event.target.result;
+              if (cursor) {
+                cursor.delete();
+                cursor.continue();
+              }
+            };
+            clean.products.forEach(function (product) {
+              if (!product.barcode) return;
+              products.put(Object.assign({}, product, {
+                barcode: String(product.barcode),
+                cacheName: clean.cacheName || 'default',
+                cachedAt: Date.now(),
+              }));
+            });
+            meta.put({
+              key: 'lastProductLookup',
+              cacheName: clean.cacheName || 'default',
+              version: clean.version || '',
+              count: clean.products.length,
+              updatedAt: Date.now(),
+            });
+            tx.oncomplete = resolve;
+            tx.onerror = function () { reject(tx.error); };
+          });
+          setStatus('Product lookup cached. Ready to scan.', 'ready');
+        } catch (error) {
+          console.warn('Product lookup cache failed', error);
+        }
+      }
+
+      async function lookupProductByBarcode(barcode) {
+        const code = String(barcode || '');
+        if (!code) return null;
+        if (state.productLookup && Array.isArray(state.productLookup.products)) {
+          const memoryHit = state.productLookup.products.find(function (product) {
+            return String(product.barcode) === code;
+          });
+          if (memoryHit) return memoryHit;
+        }
+        try {
+          const db = await openLookupDb();
+          return await new Promise(function (resolve) {
+            const tx = db.transaction('products', 'readonly');
+            const request = tx.objectStore('products').get(code);
+            request.onsuccess = function () { resolve(request.result || null); };
+            request.onerror = function () { resolve(null); };
+          });
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function playBeep() {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          [880, 1160].forEach(function (freq, index) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.16, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.16);
+            osc.start(ctx.currentTime + index * 0.08);
+            osc.stop(ctx.currentTime + index * 0.08 + 0.16);
+          });
+          if (ctx.state === 'suspended') ctx.resume();
+        } catch (_) {}
+      }
+
+      function stopCapture() {
+        if (state.quaggaHandler && window.Quagga) {
+          try { Quagga.offDetected(state.quaggaHandler); } catch (_) {}
+        }
+        state.quaggaHandler = null;
+        try { if (window.Quagga) Quagga.stop(); } catch (_) {}
+        if (state.stream) {
+          state.stream.getTracks().forEach(function (track) { track.stop(); });
+          state.stream = null;
+        }
+        previewVideo.srcObject = null;
+      }
+
+      async function submitResult(value) {
+        const clean = String(value || '').trim();
+        const now = Date.now();
+        if (!clean || state.closing) return;
+        if (clean === state.lastValue && now - state.lastValueAt < 1400) return;
+        state.lastValue = clean;
+        state.lastValueAt = now;
+        state.closing = true;
+        stopCapture();
+        playBeep();
+        if (navigator.vibrate) navigator.vibrate(100);
+        resultBox.textContent = clean;
+        resultBox.classList.add('show');
+        setStatus('Captured. Returning result...', 'ready');
+        const product = await lookupProductByBarcode(clean);
+        const batches = product && Array.isArray(product.batches) ? product.batches : [];
+        const batchSummary = {
+          count: batches.length,
+          remainingQty: batches.reduce(function (sum, batch) { return sum + (Number(batch.qty) || 0); }, 0),
+          inventoryValue: batches.reduce(function (sum, batch) { return sum + ((Number(batch.qty) || 0) * (Number(batch.unitCost) || 0)); }, 0),
+          nextBatch: batches.find(function (batch) { return Number(batch.qty || 0) > 0; }) || null,
+        };
+
+        postToParent({
+          type: 'NDS_CAPTURE_RESULT',
+          mode: state.mode,
+          returnTarget: state.returnTarget,
+          value: clean,
+          barcode: clean,
+          payload: {
+            kind: state.mode,
+            value: clean,
+            product: product,
+            batchSummary: batchSummary,
+            cartMode: state.returnTarget === 'pos-cart' || state.returnTarget === 'cart',
+          },
+        });
+
+        sendToBackend(clean).finally(function () {
+          setTimeout(function () { window.close(); }, 700);
+        });
+      }
+
+      function sendToBackend(value) {
+        if (!state.apiUrl || !state.sessionId || !state.token) return Promise.resolve();
+        const body = new URLSearchParams();
+        body.set('action', 'receiveCaptureResult');
+        body.set('sessionId', state.sessionId);
+        body.set('token', state.token);
+        body.set('mode', state.mode);
+        body.set('value', value);
+
+        return fetch(state.apiUrl, {
+          method: 'POST',
+          mode: 'cors',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body.toString(),
+        }).catch(function () {
+          const url = state.apiUrl + (state.apiUrl.indexOf('?') === -1 ? '?' : '&') + body.toString();
+          return fetch(url, { method: 'GET', mode: 'cors' }).catch(function () {});
+        });
+      }
+
+      function sendManual() {
+        const input = document.getElementById('manualValue');
+        submitResult(input.value);
+        input.value = '';
+      }
+
+      function cancelCapture() {
+        postToParent({ type: 'NDS_CAPTURE_CANCELLED', mode: state.mode, returnTarget: state.returnTarget });
+        stopCapture();
+        window.close();
+      }
+
+      function restartCapture() {
+        state.closing = false;
+        state.lastValue = '';
+        resultBox.classList.remove('show');
+        startCapture();
+      }
+
+      function initBarcode() {
+        return new Promise(function (resolve, reject) {
+          if (!window.Quagga) {
+            reject(new Error('Scanner library not loaded'));
+            return;
+          }
+          try { Quagga.stop(); } catch (_) {}
+          Quagga.init({
+            inputStream: {
+              name: 'Live',
+              type: 'LiveStream',
+              target: scannerTarget,
+              constraints: {
+                facingMode: 'environment',
+                width: { min: 640, ideal: 1280 },
+                height: { min: 480, ideal: 720 },
+              },
+              area: { top: '10%', right: '10%', bottom: '10%', left: '10%' },
+            },
+            locator: { patchSize: 'medium', halfSample: true },
+            numOfWorkers: 2,
+            decoder: {
+              readers: ['code_128_reader', 'ean_reader', 'ean_8_reader', 'code_39_reader', 'code_93_reader', 'upc_reader'],
+              multiple: false,
+            },
+            locate: true,
+            frequency: 10,
+          }, function (error) {
+            if (error) {
+              reject(error);
+              return;
+            }
+            Quagga.start();
+            state.quaggaHandler = function (result) {
+              const code = result && result.codeResult && result.codeResult.code;
+              if (code) submitResult(code);
+            };
+            Quagga.onDetected(state.quaggaHandler);
+            resolve();
+          });
+        });
+      }
+
+      async function startCapture() {
+        stopCapture();
+        announceReady();
+        await waitForConfig();
+        setStatus('Requesting camera...', 'warn');
+
+        if (state.mode !== 'barcode' && state.mode !== 'qrcode') {
+          setStatus('Mode "' + state.mode + '" is reserved for the next capture plugin. Use manual entry for now.', 'warn');
+          return;
+        }
+
+        try {
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error('Camera is not supported in this browser');
+          }
+          await initBarcode();
+          setStatus('Ready. Point camera at barcode.', 'ready');
+        } catch (error) {
+          console.error(error);
+          setStatus(error.message || 'Camera failed. Use manual entry.', 'error');
+        }
+      }
+
+      function waitForConfig() {
+        if (!window.opener || state.configReceived) return Promise.resolve();
+        return new Promise(function (resolve) {
+          const started = Date.now();
+          const timer = setInterval(function () {
+            if (state.configReceived || Date.now() - started > 700) {
+              clearInterval(timer);
+              resolve();
+            }
+          }, 50);
+        });
+      }
+
+      document.getElementById('manualValue').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') sendManual();
+      });
+
+      window.addEventListener('beforeunload', function () {
+        if (!state.closing) postToParent({ type: 'NDS_CAPTURE_CANCELLED', mode: state.mode, returnTarget: state.returnTarget });
+        stopCapture();
+      });
+
+      window.sendManual = sendManual;
+      window.cancelCapture = cancelCapture;
+      window.restartCapture = restartCapture;
+
+      window.loadTradeFlowRuntimeConfig?.('capture-runtime');
+      setTimeout(startCapture, 250);
+    })();
+  </script>
+</body>
+</html>
