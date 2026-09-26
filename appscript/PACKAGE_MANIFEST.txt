@@ -1,0 +1,30 @@
+TradeFlow Standard / Pro v2 — API Hardening + KPI Correction Package
+Date: 2026-09-01
+
+Core deployment files:
+- Index copy.html
+- code copy.gs
+- NtheembaMapping.gs
+- TradeFlowHelpContent.gs
+- LocationCatalogueFallback.gs
+- sw.js
+
+Security / integration docs:
+- TRADEFLOW_PUBLIC_API_V1.md
+- API_SECURITY_HARDENING.md
+- TRADEFLOW_API_POWERSHELL_SIGNED_CLIENT.ps1
+- SCRIPT_PROPERTIES.md
+- OPERATIONAL_CATALOGUE_API.md
+
+Operational docs:
+- DASHBOARD_MANUAL.txt
+- SHEETS_WORKFLOW_SCHEMA.md
+- WORKFLOW_AUDIT.md
+- MULTISHOP_REFACTOR_NOTES.md
+- UI_CACHE_AND_SHOP_SWITCHER.md
+- SUPER_ADMIN_FIRST_TIME_SETUP.md
+- FULL_REFINEMENT_CHANGELOG.md
+- VALIDATION_REPORT.md
+
+Data:
+- zambia_location_catalogue_v5_compact.json

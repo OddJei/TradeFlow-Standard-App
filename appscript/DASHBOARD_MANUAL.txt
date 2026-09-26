@@ -1,0 +1,585 @@
+TRADEFLOW DASHBOARD MANUAL
+==========================
+
+Purpose
+-------
+This manual explains what each dashboard card, number, table, column, and row means in the TradeFlow app.
+
+Currency
+--------
+All money values are shown in ZMW.
+
+Important Business Note
+-----------------------
+Revenue may be recorded manually or through the POS workflow when enabled for this app.
+
+Profit, COGS, and realized margin become more accurate when stock adjustments, physical counts, receipts, POS sales, and batch records are used consistently.
+
+Standard Sprint-01 Review Notes
+-------------------------------
+Products can keep one primary barcode plus extra exact barcodes. Barcode values are preserved as entered or scanned, including leading zeroes. A TradeFlow-generated barcode appears only when the owner explicitly uses the generate action.
+
+The Central Catalogue helps Ntheemba identify products for customer conversations. Linking or correction proposals must not change TradeFlow-owned price, cost, stock, supplier, batch, revenue, expense, or policy facts.
+
+Standard supports up to three shops. The business-owner Super Admin has dedicated Multi-Shop and Super Admin tabs. Multi-Shop owns shop creation, switching, primary selection, location/opening-hours configuration, and shop metadata; Super Admin owns accounts/assignments, system sources, sessions, audit, repair/migration, and protected reset. Each shop has its own spreadsheet and operational state, so products, stock, POS, customer orders, handovers, restock records, adjustments, revenue, expenses, budgets, and notifications stay inside the originating shop.
+
+First-time setup now requires shop setup but allows one shop if the business only has one shop. When run in an approved Apps Script runtime, setup creates a control spreadsheet and one separate spreadsheet per shop. Each shop spreadsheet owns its own products, stock, orders, staff, and settings.
+
+Location setup uses only the embedded Zambia V5 catalogue. Province, District, and Town are dependent canonical dropdowns; Area/Compound/Township/Village is an editable autocomplete using the embedded researched V5 town-area and district-locality suggestions, while address details are entered manually. Unlisted Area values are always accepted. No external location API is configured or called.
+
+Responsive Grid Rule
+--------------------
+Summary and product-card grids should keep the TradeFlow 2/4/6 density pattern: two columns on phones, four columns on tablet-width screens, and six columns on wide desktop screens. Forms, tables, charts, and text-heavy panels may keep their own layout where a card grid would reduce usability.
+
+
+1. MAIN DASHBOARD
+=================
+
+The main dashboard gives the owner or admin a quick snapshot of sales visibility, expenses, inventory value, expected profit, stock risk, and recent movement.
+
+
+1.1 Today's Revenue
+-------------------
+Meaning:
+Revenue recorded today for the active shop.
+
+Formula:
+Today's Revenue = Sum(active-shop revenue.amount where date = today)
+
+
+1.2 Today's Cash Out
+--------------------
+Meaning:
+All expense cash-out recorded today for the active shop, including stock purchases when they are recorded as expenses.
+
+Formula:
+Today's Cash Out = Sum(active-shop expense.amount where date = today)
+
+Important:
+This is a cash-flow measure, not an operating-expense measure.
+
+
+1.3 Month Revenue
+-----------------
+Meaning:
+Revenue recorded in the current calendar month for the active shop.
+
+Formula:
+Month Revenue = Sum(active-shop revenue.amount in current month)
+
+
+1.4 Month Gross Profit
+----------------------
+Meaning:
+Revenue earned in the current month minus the FIFO cost of stock actually sold in the current month.
+
+Formula:
+Month Gross Profit = Month Revenue - Month Sales COGS
+
+Sales COGS includes stock reductions caused by POS Sale and Customer Order fulfilment.
+Damage, expiry, missing stock, and other inventory losses are not counted as sales COGS.
+
+
+1.5 Month Net Profit
+--------------------
+Meaning:
+The current month's profit after sales COGS, operating expenses, and inventory losses.
+
+Formula:
+Month Net Profit = Month Revenue
+                   - Month Sales COGS
+                   - Month Operating Expenses
+                   - Month Inventory Loss
+
+Important:
+Inventory/restock purchase cash-out is not deducted again as an operating expense. Its cost enters profit through COGS when stock is sold. This prevents double counting.
+
+
+1.6 Month Cash Flow
+-------------------
+Meaning:
+Cash coming in minus cash going out during the current month.
+
+Formula:
+Month Cash Flow = Month Revenue - Month Cash Out
+
+Important:
+Cash Flow and Net Profit answer different questions. Cash Flow includes inventory purchase cash-out; Net Profit recognizes inventory cost through COGS when goods are sold.
+
+
+1.7 Inventory Value at Cost
+---------------------------
+Meaning:
+Current active-shop stock still on hand, valued at FIFO batch cost.
+
+Formula:
+Inventory Value = Sum(remaining batch quantity * batch unit cost)
+
+Only batches belonging to the active shop are included.
+
+
+1.8 Projected Margin on Stock
+-----------------------------
+Meaning:
+The gross margin that would be earned if current remaining stock is sold at each batch/product selling-price snapshot.
+
+Formula:
+Projected Margin on Stock =
+  Sum((selling price snapshot - unit cost) * quantity remaining)
+
+This is a projection, not realized or net profit.
+
+
+1.9 Month Operating Expenses
+----------------------------
+Meaning:
+Current-month running business expenses excluding inventory/restock purchases.
+
+Examples:
+Rent, electricity, wages, transport, airtime, bank charges, and other operating costs.
+
+Formula:
+Month Operating Expenses =
+  Sum(month expenses excluding inventory-purchase categories/sources)
+
+
+1.10 Month Inventory Loss
+-------------------------
+Meaning:
+FIFO cost value removed from stock for non-sale reasons during the month.
+
+Examples:
+Damaged, Missing, Expired, Counting Error, or damaged-on-receipt stock.
+
+Formula:
+Month Inventory Loss =
+  Sum(non-sale stock-adjustment COGS in current month)
+
+Inventory loss reduces Net Profit but is not treated as customer-sale COGS.
+
+
+1.11 Dead Stock 60d
+-------------------
+Meaning:
+Products that still have stock and whose latest meaningful activity is older than 60 days.
+
+Meaningful activity:
+- latest stock receipt; or
+- latest customer/POS sale.
+
+A manual stock correction does not make old stock appear freshly selling.
+
+
+1.12 Operating Expense Ratio
+----------------------------
+Meaning:
+How much of current-month revenue is consumed by operating expenses.
+
+Formula:
+Operating Expense Ratio =
+  (Month Operating Expenses / Month Revenue) * 100
+
+If Month Revenue is zero, the dashboard shows "No revenue".
+
+
+1.13 Month Stock Received at Cost
+---------------------------------
+Meaning:
+Cost value of inventory physically received during the current month.
+
+Formula:
+Month Stock Received at Cost =
+  Sum(quantity received * unit cost for batches received this month)
+
+This is shown as a supporting pill rather than profit because receipt timing is not the same as sales recognition or cash payment timing.
+
+
+1.14 Turnover Estimate
+----------------------
+Meaning:
+A simple active-shop inventory-turnover indicator.
+
+Formula:
+Turnover Estimate = Total Sales COGS / Current Inventory Value at Cost
+
+Use:
+Higher values indicate inventory cost is being converted into sales more quickly. It is an estimate, not an annualized accounting ratio.
+
+
+1.15 Month-over-Month Snapshot
+------------------------------
+Meaning:
+Compares the actual current calendar month against the immediately previous calendar month, even when one month has zero activity.
+
+Cards:
+- Revenue
+- Gross Profit
+- Net Profit
+- Cash Flow
+
+The previous implementation selected the last two months that happened to contain data. The hardened KPI logic zero-fills real calendar months so "current vs previous" cannot silently skip an empty month.
+
+
+1.16 Inventory Snapshot
+-----------------------
+Shows products with the highest current active-shop stock against their configured maximum stock target.
+
+
+1.17 Detail Drilldown
+---------------------
+Shows recent active-shop activity and expense-category mix.
+
+All dashboard KPI calculations are active-shop scoped. Shop 2 figures cannot be mixed into Main Shop and vice versa.
+
+
+2. PRODUCTS TAB
+===============
+
+The Products tab shows all products, current stock, prices, cost history, and product-level stock status.
+
+Central Catalogue Coverage:
+Shows linked, need-linking, submitted, attention, and local-only counts from the locally stored product NCPC mapping state.
+
+Coverage:
+Linked / (Linked + Need Linking + Awaiting Review + Attention)
+
+Local Only:
+Products intentionally excluded from Central Catalogue coverage. These are shown separately and do not reduce the coverage percentage.
+
+Help:
+Use the Help buttons in Products, Add Product, and NCPC identity mapping to open workflow-specific guidance. Each article includes the expected result, likely mistakes, recovery steps, and a Read more path in the Standard playbook.
+
+Product Stock:
+Sum all batch quantities remaining for that product.
+
+Product Inventory Value:
+Sum(batch.qtyRemaining * batch.unitCost)
+
+Total Remaining Margin:
+Sum(batch.remainingMargin)
+
+Restock Frequency:
+Count(restock order items for product) + Count(product batches)
+
+
+3. POS TAB
+==========
+
+The POS tab records sales when the POS workflow is enabled in this standard app.
+
+POS Sale:
+Creates a sale/revenue record and may create stock movement records depending on the app's configured POS flow.
+
+Amount:
+Sum of sold item quantities multiplied by their selling prices.
+
+Trust note:
+Amounts should preserve real decimal values. For example, ZMW 2.5 should display as 2.5, not rounded to 3.
+
+
+4. QUICK RESTOCK TAB
+====================
+
+The Quick Restock tab records stock received directly into inventory without first building a budget order.
+
+When stock is received:
+- A new batch is added to the product.
+- Inventory value increases.
+- Expected profit remaining updates.
+- A notification is created.
+
+Batch math:
+Total Cost = Qty Received * Unit Cost
+Expected Revenue = Qty Received * Selling Price Snapshot
+Expected Margin = Expected Revenue - Total Cost
+
+
+5. REVENUE TAB
+==============
+
+The Revenue tab records daily revenue.
+
+Revenue Dashboard Cards:
+- Filtered Revenue = Sum visible revenue rows after filters
+- This Month = Sum revenue rows in the current month
+- Average Entry = Filtered Revenue / Number of visible revenue rows
+- Largest Entry = Highest revenue amount among visible rows
+
+Revenue Filters:
+- From Date
+- To Date
+- Category
+- Search
+
+Revenue Table Columns:
+- Date
+- Amount
+- Notes
+
+
+6. EXPENSES TAB
+===============
+
+The Expenses tab records spending by category and named expense.
+
+Expenses may be:
+- Manually entered
+- Auto-created from budget purchases
+- Auto-created from recurring expenses
+
+Expenses Dashboard Cards:
+- Filtered Expenses = Sum visible expense rows after filters
+- This Month = Sum expense rows in the current month
+- Average Entry = Filtered Expenses / Number of visible expense rows
+- Top Category = Expense category with the highest total amount
+
+Expense Filters:
+- From Date
+- To Date
+- Category
+- Search
+
+Expense Table Columns:
+- Date
+- Category
+- Expense
+- Amount
+- Notes
+
+
+7. SHOP INSPECTION TAB
+======================
+
+The Shop Inspection tab compares physical counts against target stock levels and helps build restock budgets.
+
+Current Stock:
+Sum of remaining quantities across all batches for the product.
+
+Fill %:
+(Current Stock / Max Stock) * 100
+
+Restock Quantity:
+Max Stock - Physical Count
+
+If the result is below zero, it becomes zero.
+
+Apply Physical Count:
+If physical count is higher than app stock, the app adds an overage batch and creates a stock adjustment.
+
+If physical count is lower than app stock, the app reduces stock through FIFO batch reduction and creates a stock adjustment.
+
+FIFO means the oldest stock batch is reduced first.
+
+
+8. BUDGET BUILDER TAB
+=====================
+
+The Budget Builder prepares a restock plan before purchase.
+
+Budget Row:
+One row represents one product planned for restocking.
+
+Budget Total:
+Sum(row.restockQty * row.costPrice)
+
+Checkout / Purchase:
+When checkout is confirmed:
+- A restock order is created.
+- The order becomes a pending receipt.
+- An expense is created for the purchase.
+- The budget is cleared.
+
+
+9. PENDING RECEIPTS TAB
+=======================
+
+The Pending Receipts tab confirms stock that was purchased but not yet received.
+
+Usable Qty:
+Received Qty - Damaged Qty
+
+Only usable quantity is added to stock.
+
+Damaged quantity does not increase stock.
+
+Damaged stock creates a stock adjustment loss.
+
+Damaged Cost:
+Damaged Qty * Unit Cost
+
+
+10. ORDER HISTORY TAB
+=====================
+
+The Order History tab shows restock orders already placed and their receipt progress.
+
+Expected:
+Total quantity ordered.
+
+Received:
+Total quantity confirmed as received.
+
+Damaged:
+Total quantity marked damaged.
+
+Progress %:
+(Received Qty / Expected Qty) * 100
+
+
+11. STOCK ADJUSTMENTS TAB
+=========================
+
+The Stock Adjustments tab records stock reductions and losses.
+
+Examples:
+- Damaged stock
+- Physical count shortage
+- Inspection assumed sale
+- Manual reduction
+- POS stock movement, when used by the POS workflow
+
+COGS:
+Cost of goods removed from stock.
+
+Formula:
+COGS = Qty Reduced * Unit Cost of affected batch
+
+Estimated Revenue:
+Qty Reduced * Selling Price Snapshot
+
+Estimated Margin:
+Estimated Revenue - COGS
+
+
+12. INVENTORY LEDGER TAB
+========================
+
+The Inventory Ledger shows every restock batch and its profit lifecycle.
+
+Remaining Profit:
+Sum(batch.remainingMargin)
+
+Realized Gross Margin:
+Sum(batch.realizedMargin)
+
+Inventory Value:
+Sum(batch.qtyRemaining * batch.unitCost)
+
+Ledger Table Columns:
+- Restock Date
+- Product
+- Batch ID
+- Qty Received
+- Qty Remaining
+- Unit Cost
+- Selling Snapshot
+- Total Cost
+- Expected Revenue
+- Expected Margin
+- Margin Realized
+- Remaining Margin
+- Status
+
+
+13. REPORTS TAB
+===============
+
+The Reports tab gives a deeper report view with date filters, KPIs, charts, and tables.
+
+The date filter affects:
+- Revenue rows
+- Expense rows
+- COGS rows
+- Batch rows
+
+Supported exports:
+- CSV
+- PDF
+- Word DOC
+- Word DOCX
+- Google Sheets link
+
+Report KPI Cards:
+- Total Revenue = Sum revenue rows in selected date range
+- Gross Margin = ((Revenue - COGS) / Revenue) * 100
+- Net Profit = Revenue - Sales COGS - Operating Expenses - Inventory Loss
+- Operating Expenses = Sum non-inventory expenses in selected date range
+- Inventory Turnover = COGS / Inventory Value
+- Cash Flow = Revenue - Expenses
+- Inventory Value = Current remaining stock value
+- Projected Margin on Stock = Expected profit still inside remaining stock
+- Realized Gross Margin = Profit already realized from reduced stock
+- Open Batch Value = Inventory value for all batches not completed
+- Completed Batch Profit = Realized profit from completed batches
+- Average Margin % = Expected batch margin divided by expected batch revenue
+
+Profit Drilldown:
+Shows month-by-month values:
+- Revenue
+- Operating Expenses
+- Cash Out
+- Cash Flow
+- Net Profit
+
+Profit by Batch Table:
+One row represents one batch and shows expected, realized, and remaining margin.
+
+Profit by Product Table:
+One row represents one product and shows stock, inventory value, realized margin, and remaining margin.
+
+Revenue Table:
+One row is one revenue record inside the selected date range.
+
+Expenses Table:
+One row is one expense record inside the selected date range.
+
+COGS Table:
+One row is one stock adjustment cost record inside the selected date range.
+
+
+14. KEY TERMS
+=============
+
+Batch:
+A group of stock received at one time with its own cost price and selling price snapshot.
+
+Unit Cost:
+The cost price per unit for a batch.
+
+Selling Snapshot:
+The selling price captured at the time of batch creation or updated for remaining open stock.
+
+COGS:
+Cost of goods sold or removed from stock.
+
+Realized Margin:
+Profit already counted from stock reductions.
+
+Remaining Margin:
+Expected profit still sitting in remaining stock.
+
+Inventory Value:
+The cost value of stock still remaining.
+
+Cash Flow:
+Revenue minus expenses.
+
+Net Profit:
+Revenue minus COGS minus operating expenses.
+
+Dead Stock:
+Stock that remains available but has not moved recently.
+
+Pending Receipt:
+A purchase order that has not yet been fully received into stock.
+
+
+FIRST-TIME SETUP (STANDARD)
+- The business owner becomes Super Admin.
+- Setup asks for business details and one shared Phone/WhatsApp line.
+- Choose 1, 2, or 3 shops.
+- Configure each shop's Zambia Province, District, Town/Settlement, Area/Compound/Township/Village (with researched suggestions plus manual entry), address/landmark, and its own weekly opening hours.
+- Explicitly choose the primary shop.
+- Choose enabled Standard TradeFlow modules. Reports stay included.
+- NCPC is enabled automatically; Ntheemba is configured later.
+- Setup creates only the Super Admin account. Admin/Staff accounts are added later from Super Admin and assigned to one shop.

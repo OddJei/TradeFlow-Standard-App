@@ -1,0 +1,15 @@
+{
+  "TRADEFLOW_PRODUCT": "TradeFlow",
+  "TRADEFLOW_EDITION": "Standard v1",
+  "TRADEFLOW_APP_VERSION": "1.0.0",
+  "TRADEFLOW_ENVIRONMENT": "standard-staging",
+  "TRADEFLOW_BUSINESS_ID": "STANDARD_STAGING_BUSINESS_ID",
+  "CAPTURE_RUNTIME_URL": "https://nds-capture-runtime.onrender.com",
+  "DEPLOYMENT_URL": "<set per Apps Script deployment>",
+  "CAPTURE_RUNTIME_SOURCE": "packages/capture-runtime/",
+  "TRADEFLOW_PUBLIC_API_TOKEN": "<set only in Script Properties for approved Standard API callers>",
+  "SENTRY_DSN": "<optional; set only in Script Properties when approved>",
+  "NTHEEMBA_API_TOKEN": "<set only when an approved Ntheemba integration exists>",
+  "NTHEEMBA_API_SIGNING_SECRET": "<set only when an approved Ntheemba integration exists>",
+  "NTHEEMBA_BUSINESS_ID": "STANDARD_STAGING_BUSINESS_ID"
+}

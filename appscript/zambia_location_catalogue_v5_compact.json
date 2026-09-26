@@ -1,0 +1,2622 @@
+{
+  "country": "Zambia",
+  "country_code": "ZM",
+  "version": "5.0",
+  "release": "National Baseline",
+  "national_district_coverage": true,
+  "ui": {
+    "province": "dropdown",
+    "district": "dependent_dropdown",
+    "town": "dependent_dropdown_with_other",
+    "town_other_enabled": true,
+    "area": "free_text_with_suggestions",
+    "allow_unlisted_area": true,
+    "area_suggestion_priority": [
+      "town.areas",
+      "district.locality_hints",
+      "manual"
+    ]
+  },
+  "provinces": [
+    {
+      "id": "zm-central",
+      "name": "Central",
+      "districts": [
+        {
+          "id": "zm-central-chibombo",
+          "name": "Chibombo",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kamaila",
+            "Katuba",
+            "Chunga"
+          ],
+          "towns": [
+            {
+              "id": "zm-central-chibombo-chibombo",
+              "name": "Chibombo",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-central-chisamba",
+          "name": "Chisamba",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Liteta",
+            "Monangombe",
+            "Mutenga"
+          ],
+          "towns": [
+            {
+              "id": "zm-central-chisamba-chisamba",
+              "name": "Chisamba",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-central-chitambo",
+          "name": "Chitambo",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Luombwa",
+            "Katonga",
+            "Lulimala"
+          ],
+          "towns": [
+            {
+              "id": "zm-central-chitambo-chitambo",
+              "name": "Chitambo",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-central-kabwe",
+          "name": "Kabwe",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-central-kabwe-kabwe",
+              "name": "Kabwe",
+              "aliases": [],
+              "areas": [
+                "Town Centre",
+                "Luangwa Township",
+                "Makululu",
+                "Mukobeko",
+                "Highridge",
+                "Katondo",
+                "Bwacha",
+                "Chimanimani",
+                "Chindwin Barracks",
+                "Zambia Railways Compound",
+                "Kasanda",
+                "Chowa",
+                "Mine Area",
+                "Aerodrome",
+                "Natuseko",
+                "Kalonga",
+                "Poleni",
+                "Nkrumah",
+                "Buyantanshi",
+                "New Mpima",
+                "Prospect",
+                "Lilyvale"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-central-kapiri-mposhi",
+          "name": "Kapiri Mposhi",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kashitu",
+            "Kasanta",
+            "Mushimbili"
+          ],
+          "towns": [
+            {
+              "id": "zm-central-kapiri-mposhi-kapiri-mposhi",
+              "name": "Kapiri Mposhi",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-central-luano",
+          "name": "Luano",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mibanga",
+            "Munda",
+            "Mwalala"
+          ],
+          "towns": [
+            {
+              "id": "zm-central-luano-luano",
+              "name": "Luano",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-central-mkushi",
+          "name": "Mkushi",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Chitina",
+            "Nkumbi",
+            "Musofu"
+          ],
+          "towns": [
+            {
+              "id": "zm-central-mkushi-mkushi",
+              "name": "Mkushi",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-central-mumbwa",
+          "name": "Mumbwa",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-central-mumbwa-mumbwa",
+              "name": "Mumbwa",
+              "aliases": [],
+              "areas": [
+                "Central Business District",
+                "Itezhi-Tezhi Compound",
+                "Chaampa",
+                "Kasondela",
+                "Mupona",
+                "Mumba",
+                "Chibolyo",
+                "Nambala"
+              ]
+            },
+            {
+              "id": "zm-central-mumbwa-nangoma",
+              "name": "Nangoma",
+              "aliases": [],
+              "areas": [
+                "Nangoma Central",
+                "Nalubanda",
+                "Keezwa",
+                "Chisalu",
+                "Matala"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-central-ngabwe",
+          "name": "Ngabwe",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Luamala",
+            "Chisangwa",
+            "Chisanga"
+          ],
+          "towns": [
+            {
+              "id": "zm-central-ngabwe-ngabwe",
+              "name": "Ngabwe",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-central-serenje",
+          "name": "Serenje",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mweshe",
+            "Kanona",
+            "Mailo"
+          ],
+          "towns": [
+            {
+              "id": "zm-central-serenje-serenje",
+              "name": "Serenje",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-central-shibuyunji",
+          "name": "Shibuyunji",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kapyanga West",
+            "Kapyanga East",
+            "Mukulaikwa"
+          ],
+          "towns": [
+            {
+              "id": "zm-central-shibuyunji-shibuyunji",
+              "name": "Shibuyunji",
+              "aliases": [],
+              "areas": []
+            },
+            {
+              "id": "zm-central-shibuyunji-nampundwe",
+              "name": "Nampundwe",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zm-copperbelt",
+      "name": "Copperbelt",
+      "districts": [
+        {
+          "id": "zm-copperbelt-chililabombwe",
+          "name": "Chililabombwe",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-copperbelt-chililabombwe-chililabombwe",
+              "name": "Chililabombwe",
+              "aliases": [],
+              "areas": [
+                "Lubengele",
+                "Kakoso",
+                "Kakoso South",
+                "Kamenza",
+                "Kamenza East",
+                "Kawama",
+                "Nakatindi",
+                "Kafue",
+                "Ngebe",
+                "Mumba",
+                "Buntungwa",
+                "Twikatane",
+                "Makofi",
+                "Konkola",
+                "Mine Area",
+                "Second Class"
+              ]
+            },
+            {
+              "id": "zm-copperbelt-chililabombwe-kasumbalesa",
+              "name": "Kasumbalesa",
+              "aliases": [],
+              "areas": [
+                "Border Area",
+                "Market Area",
+                "Residential Area"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-copperbelt-chingola",
+          "name": "Chingola",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-copperbelt-chingola-chingola",
+              "name": "Chingola",
+              "aliases": [],
+              "areas": [
+                "Nchanga",
+                "Kabundi",
+                "Riverside",
+                "Chingola Central",
+                "Chingola South",
+                "Lulamba",
+                "Chikola",
+                "Chiwempala",
+                "Kasompe Old",
+                "Mikiloni",
+                "Fitula",
+                "Kapisha",
+                "Musenga",
+                "Ipafu",
+                "Kalilo",
+                "Mushingshi",
+                "Mutenda",
+                "Hellen",
+                "Luano Park",
+                "Mwaiseni"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-copperbelt-kalulushi",
+          "name": "Kalulushi",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-copperbelt-kalulushi-kalulushi",
+              "name": "Kalulushi",
+              "aliases": [],
+              "areas": [
+                "Kalulushi Urban",
+                "Chibuluma",
+                "Buseko",
+                "Kankoshi",
+                "Kalanga",
+                "Chati",
+                "Nsokoloko",
+                "Remmy Chisupa",
+                "Luapula",
+                "Lukoshi",
+                "Lubanga",
+                "Twaiteka",
+                "Mwambashi",
+                "Kalungwishi",
+                "Kafue",
+                "Dongwe",
+                "Ichimpe",
+                "Lubuto",
+                "Lulamba",
+                "Kalengwa",
+                "Chembe",
+                "Musakashi",
+                "Sitwe",
+                "Kabaso",
+                "Minsenga",
+                "Kawama",
+                "Mitobo",
+                "Kafubu Depot"
+              ]
+            },
+            {
+              "id": "zm-copperbelt-kalulushi-chambishi",
+              "name": "Chambishi",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-copperbelt-kitwe",
+          "name": "Kitwe",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-copperbelt-kitwe-kitwe",
+              "name": "Kitwe",
+              "aliases": [],
+              "areas": [
+                "Wusakile",
+                "Chamboli",
+                "Luangwa",
+                "Chibote",
+                "Limaposa",
+                "Mindolo",
+                "Kamakonde",
+                "Buchi",
+                "Miseshi",
+                "Parklands",
+                "Mukuba",
+                "Luyando",
+                "Bupe",
+                "Kafue",
+                "Kamfinsa",
+                "Ndeke",
+                "Musonda",
+                "Lubwa",
+                "Ipusukilo",
+                "Riverside",
+                "Kwacha",
+                "Bulangililo",
+                "Chantete",
+                "Itimpi",
+                "Buntungwa",
+                "Kamatipa",
+                "Lubuto",
+                "Chimwemwe",
+                "Kawama",
+                "Chankalamu",
+                "Kalufe Park",
+                "Kitwe West"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-copperbelt-luanshya",
+          "name": "Luanshya",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-copperbelt-luanshya-luanshya",
+              "name": "Luanshya",
+              "aliases": [],
+              "areas": [
+                "Luanshya Township",
+                "Mikomfwa",
+                "Mpatamatu",
+                "Roan",
+                "Mwaiseni",
+                "Rivercross",
+                "Fisenge",
+                "Baluba",
+                "Mipundu",
+                "Buteko",
+                "Mpelembe",
+                "Kamuchanga",
+                "Mulungushi",
+                "Chawama",
+                "Nkoloma",
+                "Kafubu",
+                "Lumumba",
+                "Maposa",
+                "Buyatanshi",
+                "Kawama",
+                "Ngebe",
+                "Nkulumashiba"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-copperbelt-lufwanyama",
+          "name": "Lufwanyama",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kansanta",
+            "Milopa",
+            "Kansoka"
+          ],
+          "towns": [
+            {
+              "id": "zm-copperbelt-lufwanyama-lufwanyama",
+              "name": "Lufwanyama",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-copperbelt-masaiti",
+          "name": "Masaiti",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mapalo",
+            "Mwatishi",
+            "Majaliwa"
+          ],
+          "towns": [
+            {
+              "id": "zm-copperbelt-masaiti-masaiti",
+              "name": "Masaiti",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-copperbelt-mpongwe",
+          "name": "Mpongwe",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Luswishi",
+            "Kasonga",
+            "Munkumpu"
+          ],
+          "towns": [
+            {
+              "id": "zm-copperbelt-mpongwe-mpongwe",
+              "name": "Mpongwe",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-copperbelt-mufulira",
+          "name": "Mufulira",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-copperbelt-mufulira-mufulira",
+              "name": "Mufulira",
+              "aliases": [],
+              "areas": [
+                "Kawama East",
+                "Kawama West",
+                "Kansuswa",
+                "Zimba",
+                "Minambe",
+                "Mokambo",
+                "Zimba Compound",
+                "Murundu",
+                "Butondo",
+                "Kamuchanga",
+                "Eastlea",
+                "Chibolya",
+                "Mupambe",
+                "Miseshi",
+                "Kalukanya",
+                "Kantanshi",
+                "Fairview",
+                "Ndeke",
+                "Rockview",
+                "Hilltop",
+                "Francis Mukuka",
+                "Eaglet",
+                "Kantanshi Extension",
+                "Chibote",
+                "Mufulira Central",
+                "Mine Area",
+                "Kafironda"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-copperbelt-ndola",
+          "name": "Ndola",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-copperbelt-ndola-ndola",
+              "name": "Ndola",
+              "aliases": [],
+              "areas": [
+                "Industrial Area",
+                "Mine Masala",
+                "Itawa",
+                "Kansenshi",
+                "Chifubu",
+                "Mitengo",
+                "Northrise",
+                "Minsundu",
+                "Ndola Villa",
+                "Pamodzi",
+                "Kanini",
+                "Hillcrest",
+                "Twapia",
+                "Mushili",
+                "Kabushi",
+                "Lubuto",
+                "Nkwazi",
+                "Kawama"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zm-eastern",
+      "name": "Eastern",
+      "districts": [
+        {
+          "id": "zm-eastern-chadiza",
+          "name": "Chadiza",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Tikondane",
+            "Mangwe",
+            "Nsadzu"
+          ],
+          "towns": [
+            {
+              "id": "zm-eastern-chadiza-chadiza",
+              "name": "Chadiza",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-eastern-chama",
+          "name": "Chama",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Muchinga",
+            "Mazonde",
+            "Nkhankha"
+          ],
+          "towns": [
+            {
+              "id": "zm-eastern-chama-chama",
+              "name": "Chama",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-eastern-chasefu",
+          "name": "Chasefu",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Manda Hill",
+            "Susa",
+            "Magodi"
+          ],
+          "towns": [
+            {
+              "id": "zm-eastern-chasefu-chasefu",
+              "name": "Chasefu",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-eastern-chipangali",
+          "name": "Chipangali",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Sisinje",
+            "Lunkhuswe",
+            "Nthope"
+          ],
+          "towns": [
+            {
+              "id": "zm-eastern-chipangali-chipangali",
+              "name": "Chipangali",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-eastern-chipata",
+          "name": "Chipata",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-eastern-chipata-chipata",
+              "name": "Chipata",
+              "aliases": [],
+              "areas": [
+                "Magazine Compound",
+                "Kabulonga Section",
+                "Luangwa House",
+                "Kagunda",
+                "Kapata Compound",
+                "Chisitu",
+                "Malendi Compound",
+                "Mchini Compound",
+                "Nabvutika Compound",
+                "Kalongwezi",
+                "Umodzi",
+                "Chiziro",
+                "Magwero",
+                "Chimwemwe",
+                "Chipata Central Hospital Compound"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-eastern-kasenengwa",
+          "name": "Kasenengwa",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kwenje",
+            "Mpunza",
+            "Ng'ongwe"
+          ],
+          "towns": [
+            {
+              "id": "zm-eastern-kasenengwa-kasenengwa",
+              "name": "Kasenengwa",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-eastern-katete",
+          "name": "Katete",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kazakaluba",
+            "Kamphambe",
+            "Katiula"
+          ],
+          "towns": [
+            {
+              "id": "zm-eastern-katete-katete",
+              "name": "Katete",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-eastern-lumezi",
+          "name": "Lumezi",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Chibande",
+            "Lukusuzi",
+            "Lumimba"
+          ],
+          "towns": [
+            {
+              "id": "zm-eastern-lumezi-lumezi",
+              "name": "Lumezi",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-eastern-lundazi",
+          "name": "Lundazi",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Vuu",
+            "Mphamba",
+            "Mnyamazi"
+          ],
+          "towns": [
+            {
+              "id": "zm-eastern-lundazi-lundazi",
+              "name": "Lundazi",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-eastern-lusangazi",
+          "name": "Lusangazi",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mawanda",
+            "Chikowa",
+            "Mudonsa"
+          ],
+          "towns": [
+            {
+              "id": "zm-eastern-lusangazi-lusangazi",
+              "name": "Lusangazi",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-eastern-mambwe",
+          "name": "Mambwe",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Nsefu",
+            "Mnkhanya",
+            "Ncheka"
+          ],
+          "towns": [
+            {
+              "id": "zm-eastern-mambwe-mambwe",
+              "name": "Mambwe",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-eastern-nyimba",
+          "name": "Nyimba",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Luangwa",
+            "Chinambi",
+            "Kaliwe"
+          ],
+          "towns": [
+            {
+              "id": "zm-eastern-nyimba-nyimba",
+              "name": "Nyimba",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-eastern-petauke",
+          "name": "Petauke",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-eastern-petauke-petauke",
+              "name": "Petauke",
+              "aliases": [],
+              "areas": [
+                "Anusa",
+                "Showgrounds",
+                "Tasala",
+                "Chimate",
+                "Kamfinzi",
+                "Fairview",
+                "Garden Compound",
+                "Chibisa Turn-off",
+                "New Houses",
+                "Petauke Central"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-eastern-sinda",
+          "name": "Sinda",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Nyamasonkho",
+            "Chilongozi",
+            "Mng'omba"
+          ],
+          "towns": [
+            {
+              "id": "zm-eastern-sinda-sinda",
+              "name": "Sinda",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-eastern-vubwi",
+          "name": "Vubwi",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mbozi",
+            "Mbande",
+            "Matemba"
+          ],
+          "towns": [
+            {
+              "id": "zm-eastern-vubwi-vubwi",
+              "name": "Vubwi",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zm-luapula",
+      "name": "Luapula",
+      "districts": [
+        {
+          "id": "zm-luapula-chembe",
+          "name": "Chembe",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kundamfumu",
+            "Lukola",
+            "Kasomalwela"
+          ],
+          "towns": [
+            {
+              "id": "zm-luapula-chembe-chembe",
+              "name": "Chembe",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-luapula-chiengi",
+          "name": "Chiengi",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Lunchinda",
+            "Chibamba",
+            "Chipungu"
+          ],
+          "towns": [
+            {
+              "id": "zm-luapula-chiengi-chiengi",
+              "name": "Chiengi",
+              "aliases": [
+                "Chienge"
+              ],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-luapula-chifunabuli",
+          "name": "Chifunabuli",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mbabala",
+            "Chishi",
+            "Kafumbo"
+          ],
+          "towns": [
+            {
+              "id": "zm-luapula-chifunabuli-lubwe",
+              "name": "Lubwe",
+              "aliases": [],
+              "areas": []
+            },
+            {
+              "id": "zm-luapula-chifunabuli-chifunabuli",
+              "name": "Chifunabuli",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-luapula-chipili",
+          "name": "Chipili",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Makabe",
+            "Nsenga",
+            "Mweshi"
+          ],
+          "towns": [
+            {
+              "id": "zm-luapula-chipili-chipili",
+              "name": "Chipili",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-luapula-kawambwa",
+          "name": "Kawambwa",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Iyanga",
+            "Lushiba",
+            "Fisaka"
+          ],
+          "towns": [
+            {
+              "id": "zm-luapula-kawambwa-kawambwa",
+              "name": "Kawambwa",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-luapula-lunga",
+          "name": "Lunga",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mweshi",
+            "Itala",
+            "Mashiba"
+          ],
+          "towns": [
+            {
+              "id": "zm-luapula-lunga-lunga",
+              "name": "Lunga",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-luapula-mansa",
+          "name": "Mansa",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-luapula-mansa-mansa",
+              "name": "Mansa",
+              "aliases": [],
+              "areas": [
+                "Central Business District",
+                "Maiteneke",
+                "Chitamba",
+                "Kapanda",
+                "Kampalala",
+                "Prisons Area",
+                "Senama",
+                "Chilyapa",
+                "Chansunsu",
+                "Muchinka",
+                "Lukangaba",
+                "Fimpulu",
+                "Musaba",
+                "Mushipashi",
+                "Namwandwe",
+                "Lwingishi",
+                "Mulenshi"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-luapula-milenge",
+          "name": "Milenge",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Matontola",
+            "Lwela",
+            "Fishikwa"
+          ],
+          "towns": [
+            {
+              "id": "zm-luapula-milenge-milenge",
+              "name": "Milenge",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-luapula-mwansabombwe",
+          "name": "Mwansabombwe",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kayo",
+            "Mbereshi",
+            "Kabalenge"
+          ],
+          "towns": [
+            {
+              "id": "zm-luapula-mwansabombwe-mwansabombwe",
+              "name": "Mwansabombwe",
+              "aliases": [
+                "Kazembe"
+              ],
+              "areas": []
+            },
+            {
+              "id": "zm-luapula-mwansabombwe-kazembe",
+              "name": "Kazembe",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-luapula-mwense",
+          "name": "Mwense",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Michelo",
+            "Mpasa",
+            "Chibembe"
+          ],
+          "towns": [
+            {
+              "id": "zm-luapula-mwense-mwense",
+              "name": "Mwense",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-luapula-nchelenge",
+          "name": "Nchelenge",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kabuta",
+            "Munkombwe",
+            "Mwatishi"
+          ],
+          "towns": [
+            {
+              "id": "zm-luapula-nchelenge-nchelenge",
+              "name": "Nchelenge",
+              "aliases": [],
+              "areas": []
+            },
+            {
+              "id": "zm-luapula-nchelenge-kashikishi",
+              "name": "Kashikishi",
+              "aliases": [],
+              "areas": []
+            },
+            {
+              "id": "zm-luapula-nchelenge-kabuta",
+              "name": "Kabuta",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-luapula-samfya",
+          "name": "Samfya",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Lumamya",
+            "Kapilibila",
+            "Lufwishi"
+          ],
+          "towns": [
+            {
+              "id": "zm-luapula-samfya-samfya",
+              "name": "Samfya",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zm-lusaka",
+      "name": "Lusaka",
+      "districts": [
+        {
+          "id": "zm-lusaka-chilanga",
+          "name": "Chilanga",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mwembeshi",
+            "Chinyanja",
+            "Mondengwa"
+          ],
+          "towns": [
+            {
+              "id": "zm-lusaka-chilanga-chilanga",
+              "name": "Chilanga",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-lusaka-chongwe",
+          "name": "Chongwe",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kasenga",
+            "Kasisi",
+            "Chinkuli"
+          ],
+          "towns": [
+            {
+              "id": "zm-lusaka-chongwe-chongwe",
+              "name": "Chongwe",
+              "aliases": [],
+              "areas": []
+            },
+            {
+              "id": "zm-lusaka-chongwe-chalimbana",
+              "name": "Chalimbana",
+              "aliases": [],
+              "areas": []
+            },
+            {
+              "id": "zm-lusaka-chongwe-palabana",
+              "name": "Palabana",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-lusaka-kafue",
+          "name": "Kafue",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-lusaka-kafue-kafue",
+              "name": "Kafue",
+              "aliases": [],
+              "areas": [
+                "Kafue Estates",
+                "Shikoswe",
+                "Matanda",
+                "Shabusale",
+                "Kasenje",
+                "Kafue Central",
+                "Zambia Compound",
+                "Soloboni Compound",
+                "Kalundu View Compound",
+                "Chawama Compound"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-lusaka-luangwa",
+          "name": "Luangwa",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mankhokwe",
+            "Kaluluzi",
+            "Mwalilia"
+          ],
+          "towns": [
+            {
+              "id": "zm-lusaka-luangwa-luangwa",
+              "name": "Luangwa",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-lusaka-lusaka",
+          "name": "Lusaka",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-lusaka-lusaka-lusaka",
+              "name": "Lusaka",
+              "aliases": [],
+              "areas": [
+                "Barlaston",
+                "Matero",
+                "Lilanda",
+                "Emmasdale",
+                "Chudleigh",
+                "Kalundu",
+                "Olympia Park",
+                "Olympia Extension",
+                "Roma",
+                "Kamwala",
+                "Central Business District",
+                "Thorn Park",
+                "Villa Elizabetha",
+                "Longacres",
+                "Northmead",
+                "Rhodes Park",
+                "Chamba Valley",
+                "Chelstone",
+                "Avondale",
+                "Chainama",
+                "NRDC",
+                "Handsworth",
+                "Ibex Hill",
+                "Kabulonga",
+                "Sunningdale",
+                "Helen Kaunda",
+                "Arakan",
+                "Kabwata",
+                "Libala",
+                "Ridgeway",
+                "Chilenje",
+                "Nyumba Yanga",
+                "State House",
+                "Woodlands",
+                "Woodlands Extension",
+                "Chibolya",
+                "Misisi",
+                "Kabanana",
+                "Mazyopa",
+                "New Kanyama",
+                "Old Kanyama",
+                "Kanyama"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-lusaka-rufunsa",
+          "name": "Rufunsa",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kabuyu",
+            "Bundabunda",
+            "Nyamanongo"
+          ],
+          "towns": [
+            {
+              "id": "zm-lusaka-rufunsa-rufunsa",
+              "name": "Rufunsa",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zm-muchinga",
+      "name": "Muchinga",
+      "districts": [
+        {
+          "id": "zm-muchinga-chinsali",
+          "name": "Chinsali",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Itapa",
+            "Chunga",
+            "Chilunda"
+          ],
+          "towns": [
+            {
+              "id": "zm-muchinga-chinsali-chinsali",
+              "name": "Chinsali",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-muchinga-isoka",
+          "name": "Isoka",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Milongo",
+            "Itukuta",
+            "Chinyonga"
+          ],
+          "towns": [
+            {
+              "id": "zm-muchinga-isoka-isoka",
+              "name": "Isoka",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-muchinga-kanchibiya",
+          "name": "Kanchibiya",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Chambeshi",
+            "Mansha",
+            "Mumbubu"
+          ],
+          "towns": [
+            {
+              "id": "zm-muchinga-kanchibiya-kanchibiya",
+              "name": "Kanchibiya",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-muchinga-lavushimanda",
+          "name": "Lavushimanda",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Lulimala",
+            "Lukulu",
+            "Lupembashi"
+          ],
+          "towns": [
+            {
+              "id": "zm-muchinga-lavushimanda-kalonje",
+              "name": "Kalonje",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-muchinga-mafinga",
+          "name": "Mafinga",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Musipizi",
+            "Senje",
+            "Ntonga"
+          ],
+          "towns": [
+            {
+              "id": "zm-muchinga-mafinga-thendele",
+              "name": "Thendele",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-muchinga-mpika",
+          "name": "Mpika",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-muchinga-mpika-mpika",
+              "name": "Mpika",
+              "aliases": [],
+              "areas": [
+                "TAZARA Township",
+                "Chitulika",
+                "Kamwanya",
+                "Chisowa",
+                "Kapiri Compound",
+                "Mulambe",
+                "ZCA",
+                "Lwitikila",
+                "Chipushi"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-muchinga-nakonde",
+          "name": "Nakonde",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mwanga",
+            "Mulalo",
+            "Luchinde"
+          ],
+          "towns": [
+            {
+              "id": "zm-muchinga-nakonde-nakonde",
+              "name": "Nakonde",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-muchinga-shiwangandu",
+          "name": "Shiwang'andu",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Nkulungwe",
+            "Nyimbwe",
+            "Chimpundu"
+          ],
+          "towns": [
+            {
+              "id": "zm-muchinga-shiwangandu-shiwangandu",
+              "name": "Shiwang'andu",
+              "aliases": [
+                "Shiwa Ng'andu",
+                "Shiwangandu"
+              ],
+              "areas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zm-northern",
+      "name": "Northern",
+      "districts": [
+        {
+          "id": "zm-northern-chilubi",
+          "name": "Chilubi",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Chinkundu",
+            "Kanama",
+            "Mubemba"
+          ],
+          "towns": [
+            {
+              "id": "zm-northern-chilubi-chilubi",
+              "name": "Chilubi",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-northern-kaputa",
+          "name": "Kaputa",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Munkonge",
+            "Mwawe",
+            "Kapulwa"
+          ],
+          "towns": [
+            {
+              "id": "zm-northern-kaputa-kaputa",
+              "name": "Kaputa",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-northern-kasama",
+          "name": "Kasama",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-northern-kasama-kasama",
+              "name": "Kasama",
+              "aliases": [],
+              "areas": [
+                "Central Town",
+                "New Town",
+                "Location",
+                "Mukulumpe",
+                "Chikumanino",
+                "Chiba",
+                "Mulenga Hills",
+                "TAZARA",
+                "Misamfu",
+                "Milima",
+                "Jazz",
+                "Chitamba",
+                "Brown",
+                "Winberg",
+                "Kungu",
+                "Chisanga",
+                "Soft Katongo",
+                "Lua-Luo"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-northern-lunte",
+          "name": "Lunte",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Chewe",
+            "Luangwa",
+            "Kasanshi"
+          ],
+          "towns": [
+            {
+              "id": "zm-northern-lunte-lunte",
+              "name": "Lunte",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-northern-lupososhi",
+          "name": "Lupososhi",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Intandashi",
+            "Kaela",
+            "Kalinga"
+          ],
+          "towns": [
+            {
+              "id": "zm-northern-lupososhi-lupososhi",
+              "name": "Lupososhi",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-northern-luwingu",
+          "name": "Luwingu",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mushishe",
+            "Mwela Wamangu",
+            "Ipusukilo"
+          ],
+          "towns": [
+            {
+              "id": "zm-northern-luwingu-luwingu",
+              "name": "Luwingu",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-northern-mbala",
+          "name": "Mbala",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mwambezi",
+            "Kazimolwa",
+            "Motomoto"
+          ],
+          "towns": [
+            {
+              "id": "zm-northern-mbala-mbala",
+              "name": "Mbala",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-northern-mporokoso",
+          "name": "Mporokoso",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Chikulu",
+            "Lumangwe",
+            "Chimbofuma"
+          ],
+          "towns": [
+            {
+              "id": "zm-northern-mporokoso-mporokoso",
+              "name": "Mporokoso",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-northern-mpulungu",
+          "name": "Mpulungu",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kapembwa",
+            "Chibulula",
+            "Mpulungu Central"
+          ],
+          "towns": [
+            {
+              "id": "zm-northern-mpulungu-mpulungu",
+              "name": "Mpulungu",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-northern-mungwi",
+          "name": "Mungwi",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Fibwe",
+            "Kabisha",
+            "Luchewe"
+          ],
+          "towns": [
+            {
+              "id": "zm-northern-mungwi-mungwi",
+              "name": "Mungwi",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-northern-nsama",
+          "name": "Nsama",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kapisha",
+            "Nsumbu",
+            "Katwatwa"
+          ],
+          "towns": [
+            {
+              "id": "zm-northern-nsama-nsama",
+              "name": "Nsama",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-northern-senga-hill",
+          "name": "Senga Hill",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mwiluzi",
+            "Chela",
+            "Chimbili"
+          ],
+          "towns": [
+            {
+              "id": "zm-northern-senga-hill-senga-hill",
+              "name": "Senga Hill",
+              "aliases": [
+                "Senga"
+              ],
+              "areas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zm-north-western",
+      "name": "North-Western",
+      "districts": [
+        {
+          "id": "zm-north-western-chavuma",
+          "name": "Chavuma",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Nguvu Mukuku",
+            "Nyatanda",
+            "Nyambingila"
+          ],
+          "towns": [
+            {
+              "id": "zm-north-western-chavuma-chavuma",
+              "name": "Chavuma",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-north-western-ikelenge",
+          "name": "Ikelenge",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mwininyilamba",
+            "Kafweku",
+            "Mwilombi"
+          ],
+          "towns": [
+            {
+              "id": "zm-north-western-ikelenge-ikelenge",
+              "name": "Ikelenge",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-north-western-kabompo",
+          "name": "Kabompo",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kayombo",
+            "Chikonkwelo",
+            "Luli"
+          ],
+          "towns": [
+            {
+              "id": "zm-north-western-kabompo-kabompo",
+              "name": "Kabompo",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-north-western-kalumbila",
+          "name": "Kalumbila",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kibanza",
+            "Mwajimambwe",
+            "Wabituwo"
+          ],
+          "towns": [
+            {
+              "id": "zm-north-western-kalumbila-kalumbila",
+              "name": "Kalumbila",
+              "aliases": [],
+              "areas": []
+            },
+            {
+              "id": "zm-north-western-kalumbila-manyama",
+              "name": "Manyama",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-north-western-kasempa",
+          "name": "Kasempa",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kamakuku",
+            "Nselauke",
+            "Ingwe"
+          ],
+          "towns": [
+            {
+              "id": "zm-north-western-kasempa-kasempa",
+              "name": "Kasempa",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-north-western-manyinga",
+          "name": "Manyinga",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Chiteve",
+            "Loloma",
+            "Sikufele"
+          ],
+          "towns": [
+            {
+              "id": "zm-north-western-manyinga-manyinga",
+              "name": "Manyinga",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-north-western-mufumbwe",
+          "name": "Mufumbwe",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kashima West",
+            "Kashima East",
+            "Matushi"
+          ],
+          "towns": [
+            {
+              "id": "zm-north-western-mufumbwe-mufumbwe",
+              "name": "Mufumbwe",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-north-western-mushindamo",
+          "name": "Mushindamo",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kilumba",
+            "Mulonga",
+            "Musaka"
+          ],
+          "towns": [
+            {
+              "id": "zm-north-western-mushindamo-mushindamo",
+              "name": "Mushindamo",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-north-western-mwinilunga",
+          "name": "Mwinilunga",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kanzenzi",
+            "Chibwika",
+            "Kamapanda"
+          ],
+          "towns": [
+            {
+              "id": "zm-north-western-mwinilunga-mwinilunga",
+              "name": "Mwinilunga",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-north-western-solwezi",
+          "name": "Solwezi",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-north-western-solwezi-solwezi",
+              "name": "Solwezi",
+              "aliases": [],
+              "areas": [
+                "Mushitala",
+                "Riverside",
+                "50 Compound",
+                "Hospital Area",
+                "Saviye",
+                "Mukuba",
+                "Mine Area",
+                "Kabitaka",
+                "Mbonge",
+                "Stadium Area",
+                "Zangamenu",
+                "Mitec",
+                "Kandundu",
+                "Magrade",
+                "Zambia Compound",
+                "Kyawama",
+                "Airport Area",
+                "Kimasala",
+                "College Area",
+                "Kazomba",
+                "Messenger",
+                "Wisdom",
+                "Kawama",
+                "Kikombe",
+                "Tumvwanganai"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-north-western-zambezi",
+          "name": "Zambezi",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Nyakuleng'a",
+            "Lwitadi Lwatembu",
+            "Mpidi Kakong'a"
+          ],
+          "towns": [
+            {
+              "id": "zm-north-western-zambezi-zambezi",
+              "name": "Zambezi",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zm-southern",
+      "name": "Southern",
+      "districts": [
+        {
+          "id": "zm-southern-chikankata",
+          "name": "Chikankata",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kasengo",
+            "Nansenga",
+            "Turnpike"
+          ],
+          "towns": [
+            {
+              "id": "zm-southern-chikankata-chikankata",
+              "name": "Chikankata",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-southern-chirundu",
+          "name": "Chirundu",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Musaya",
+            "Kapululira",
+            "Chirundu West"
+          ],
+          "towns": [
+            {
+              "id": "zm-southern-chirundu-chirundu",
+              "name": "Chirundu",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-southern-choma",
+          "name": "Choma",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-southern-choma-choma",
+              "name": "Choma",
+              "aliases": [],
+              "areas": [
+                "Kamunza",
+                "Chandamali",
+                "New Kabanana",
+                "Mwapona",
+                "Kachacha",
+                "Overspill",
+                "Zambia Compound",
+                "Choma Township"
+              ]
+            },
+            {
+              "id": "zm-southern-choma-batoka",
+              "name": "Batoka",
+              "aliases": [],
+              "areas": [
+                "Batoka Central"
+              ]
+            },
+            {
+              "id": "zm-southern-choma-mbabala",
+              "name": "Mbabala",
+              "aliases": [],
+              "areas": [
+                "Mbabala Central"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-southern-gwembe",
+          "name": "Gwembe",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Jongola",
+            "Fumbo",
+            "Makuyu"
+          ],
+          "towns": [
+            {
+              "id": "zm-southern-gwembe-gwembe",
+              "name": "Gwembe",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-southern-itezhi-tezhi",
+          "name": "Itezhi-Tezhi",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Itumbi",
+            "Kaanzwa",
+            "Masemu"
+          ],
+          "towns": [
+            {
+              "id": "zm-southern-itezhi-tezhi-itezhi-tezhi",
+              "name": "Itezhi-Tezhi",
+              "aliases": [
+                "Itezhi Tezhi"
+              ],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-southern-kalomo",
+          "name": "Kalomo",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kasukwe",
+            "Naluja",
+            "Bbilili"
+          ],
+          "towns": [
+            {
+              "id": "zm-southern-kalomo-kalomo",
+              "name": "Kalomo",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-southern-kazungula",
+          "name": "Kazungula",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Moomba",
+            "Chooma",
+            "Nguba"
+          ],
+          "towns": [
+            {
+              "id": "zm-southern-kazungula-kazungula",
+              "name": "Kazungula",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-southern-livingstone",
+          "name": "Livingstone",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-southern-livingstone-livingstone",
+              "name": "Livingstone",
+              "aliases": [],
+              "areas": [
+                "Libuyu",
+                "Linda",
+                "Dambwa Site and Service",
+                "Dambwa",
+                "Maramba",
+                "Ngwenya",
+                "Namatama",
+                "Parkview",
+                "Mwandi",
+                "Kasiya",
+                "Off Lusaka Road",
+                "Kashitu",
+                "Mwalibonena",
+                "Nakatindi",
+                "Simoonga"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-southern-mazabuka",
+          "name": "Mazabuka",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-southern-mazabuka-mazabuka",
+              "name": "Mazabuka",
+              "aliases": [],
+              "areas": [
+                "Ndeke",
+                "Nakambala",
+                "Nakambala Estate",
+                "Lusumpuko",
+                "Kapufi",
+                "Kaleya",
+                "Kabobola",
+                "Misale",
+                "Njomona",
+                "Mazabuka Central"
+              ]
+            },
+            {
+              "id": "zm-southern-mazabuka-magoye",
+              "name": "Magoye",
+              "aliases": [],
+              "areas": [
+                "Central / Market Area"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-southern-monze",
+          "name": "Monze",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Malundu",
+            "Hamusonde",
+            "Kaila"
+          ],
+          "towns": [
+            {
+              "id": "zm-southern-monze-monze",
+              "name": "Monze",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-southern-namwala",
+          "name": "Namwala",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Moobola",
+            "Namakube",
+            "Itapa"
+          ],
+          "towns": [
+            {
+              "id": "zm-southern-namwala-namwala",
+              "name": "Namwala",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-southern-pemba",
+          "name": "Pemba",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kasiya",
+            "Hamaundu",
+            "Demu"
+          ],
+          "towns": [
+            {
+              "id": "zm-southern-pemba-pemba",
+              "name": "Pemba",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-southern-siavonga",
+          "name": "Siavonga",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Manchamvwa Inland",
+            "Sinadambwe",
+            "Lusangazi"
+          ],
+          "towns": [
+            {
+              "id": "zm-southern-siavonga-siavonga",
+              "name": "Siavonga",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-southern-sinazongwe",
+          "name": "Sinazongwe",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Chiyabi",
+            "Malima",
+            "Sinenge"
+          ],
+          "towns": [
+            {
+              "id": "zm-southern-sinazongwe-sinazongwe",
+              "name": "Sinazongwe",
+              "aliases": [],
+              "areas": []
+            },
+            {
+              "id": "zm-southern-sinazongwe-maamba",
+              "name": "Maamba",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-southern-zimba",
+          "name": "Zimba",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mangonda",
+            "Chuundwe",
+            "Mafumba"
+          ],
+          "towns": [
+            {
+              "id": "zm-southern-zimba-zimba",
+              "name": "Zimba",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zm-western",
+      "name": "Western",
+      "districts": [
+        {
+          "id": "zm-western-kalabo",
+          "name": "Kalabo",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Muchatanga",
+            "Luanginga",
+            "Mapungu"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-kalabo-kalabo",
+              "name": "Kalabo",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-western-kaoma",
+          "name": "Kaoma",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Lunyati",
+            "Kalumwange",
+            "Shitwa"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-kaoma-kaoma",
+              "name": "Kaoma",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-western-limulunga",
+          "name": "Limulunga",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Limulunga West",
+            "Makuku",
+            "Mabili"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-limulunga-limulunga",
+              "name": "Limulunga",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-western-luampa",
+          "name": "Luampa",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Lububa",
+            "Lui",
+            "Mbanyutu"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-luampa-luampa",
+              "name": "Luampa",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-western-lukulu",
+          "name": "Lukulu",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Simakumba",
+            "Kamilende",
+            "Kaluwawa"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-lukulu-lukulu",
+              "name": "Lukulu",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-western-mitete",
+          "name": "Mitete",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mataba",
+            "Lwambimba",
+            "Lupui"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-mitete-mitete",
+              "name": "Mitete",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-western-mongu",
+          "name": "Mongu",
+          "coverage": "deep_town_area",
+          "locality_hints": [],
+          "towns": [
+            {
+              "id": "zm-western-mongu-mongu",
+              "name": "Mongu",
+              "aliases": [],
+              "areas": [
+                "Boma",
+                "Sir Mwanawina",
+                "Kambule",
+                "Wenela",
+                "North Park",
+                "Hospital Area",
+                "Mukoko",
+                "Cold Storage",
+                "Tungi",
+                "Sido",
+                "Mboo",
+                "Namushakende",
+                "Helen",
+                "Yeta",
+                "Imwiko",
+                "Mulambwa",
+                "Zambia Compound",
+                "Wijnberg",
+                "Kapulanga Maunyamo",
+                "Mandanga",
+                "Malelekwa",
+                "Ngalama",
+                "Limulunga la Makuwa",
+                "Kasima"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zm-western-mulobezi",
+          "name": "Mulobezi",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kasompa",
+            "Kamanga",
+            "Luamuloba"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-mulobezi-mulobezi",
+              "name": "Mulobezi",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-western-mwandi",
+          "name": "Mwandi",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Chisu",
+            "Mushukula",
+            "Kalundu"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-mwandi-mwandi",
+              "name": "Mwandi",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-western-nalolo",
+          "name": "Nalolo",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Mukukutu",
+            "Kataba",
+            "Lubosi"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-nalolo-nalolo",
+              "name": "Nalolo",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-western-nkeyema",
+          "name": "Nkeyema",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Maloba",
+            "Shishamba",
+            "Namilangi"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-nkeyema-nkeyema",
+              "name": "Nkeyema",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-western-senanga",
+          "name": "Senanga",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Lumbe Nanyezu",
+            "Mata",
+            "Namukokoba"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-senanga-senanga",
+              "name": "Senanga",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-western-sesheke",
+          "name": "Sesheke",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Maondo",
+            "Nakatindi",
+            "Mulimambango"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-sesheke-sesheke",
+              "name": "Sesheke",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-western-shangombo",
+          "name": "Shangombo",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Sipuma",
+            "Lilondo",
+            "Simu"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-shangombo-shangombo",
+              "name": "Shangombo",
+              "aliases": [
+                "Shang'ombo"
+              ],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-western-sikongo",
+          "name": "Sikongo",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Nengu",
+            "Mutala",
+            "Mwenyi"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-sikongo-sikongo",
+              "name": "Sikongo",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        },
+        {
+          "id": "zm-western-sioma",
+          "name": "Sioma",
+          "coverage": "district_locality_fallback",
+          "locality_hints": [
+            "Kalongola",
+            "Watembo",
+            "Nalwashi"
+          ],
+          "towns": [
+            {
+              "id": "zm-western-sioma-sioma",
+              "name": "Sioma",
+              "aliases": [],
+              "areas": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
